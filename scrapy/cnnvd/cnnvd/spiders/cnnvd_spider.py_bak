@@ -1,0 +1,170 @@
+# -*- coding:UTF-8 -*-
+import re
+import scrapy #导入scrapy包
+from bs4 import BeautifulSoup
+from scrapy.http import Request ##一个单独的request的模块，需要跟进URL的时候，需要用它
+from cnnvd.items import CnnvdItem ##这是我定义的需要保存的字段，（导入cnnvd项目中，items文件中的CnnvdItem类)
+from cnnvd.items import CnnvdUrlItem
+from cnnvd.mysqlpipelines.sql import Sql
+from lxml import etree
+
+#from dingdian.items import DcontentItem
+#from dingdian.mysqlpipelines.sql import Sql
+
+
+class Myspider(scrapy.Spider):
+
+    name = 'cnnvd'
+    allowed_domains = ['cnnvd.org.cn']
+    base_url = 'http://www.cnnvd.org.cn'
+    bash_url = 'http://www.cnnvd.org.cn/web/vulnerability/querylist.tag'
+    bashurl = '&repairLd='
+    #num = 2
+    #page_num = 11581
+
+    def start_requests(self):
+        url = self.bash_url
+        print(url)
+        yield Request(url, self.parse)
+        #yield Request('http://www.cnnvd.org.cn/web/vulnerability/querylist.tag?pageno=1&repairLd=', self.parse)
+
+    def parse(self, response):
+        """
+        <input id="pagecount" name="pagecount" type="hidden" value="11581"/>
+        获取总页数
+        """
+        #print(response.text)
+        page_num = BeautifulSoup(response.text, 'lxml').find_all('input', id='pagecount')[0].attrs['value']
+        print(page_num)
+        #print('###################')
+
+        bashurl = self.bash_url
+        max_num = int(page_num)
+        #max_num = 2
+        
+        
+        for num in range(1, int(max_num) + 1):
+            if num == 1:
+                url = bashurl
+            else:
+                url = bashurl + '?pageno=' + str(num) + self.bashurl
+            print('##url:' + url)
+
+            yield Request(url, callback=self.get_cnnvd_url)
+                #yieid Request，请求新的URL，后面跟的是回调函数，你需要哪一个函数来处理这个返回值，就调用那一个函数，
+                #返回值会以参数的形式传递给你所调用的函数。
+                #
+
+    def get_cnnvd_url(self, response):
+        #print(response.text)
+        item = CnnvdUrlItem()
+        tds = BeautifulSoup(response.text, 'lxml').find_all('a', class_='a_title2', href=re.compile("ldxqById.tag"))
+        print('#####################################')
+        count = 0
+        for td in tds:
+            #print(td)
+            cnnvd_url = self.base_url + td.attrs['href']
+            print(cnnvd_url)
+            count = count  + 1
+            print('#########' + str(count) + '##############')
+            #if count == 2:
+            #    return
+            cnnvd = cnnvd_url.split('=')[1]
+            print('cnnvd=' + cnnvd)
+            item['cnnvd'] = cnnvd
+            item['url'] = url
+            item['ok'] = '1'
+            yield item
+            yield Request(cnnvd_url, callback=self.get_cnnvd_detail)
+    
+    def get_cnnvd_detail(self, response):
+        #print('+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++')
+        item = CnnvdItem()
+
+        selector = etree.HTML(response.text)
+        #print('#####漏洞信息详情：')
+        #print('#1 标题')
+        vulnerability_details = selector.xpath('/html/body/div[4]/div/div[1]/div[2]/h2/text()')[0].replace('\'', '\'\'')
+        #print(vulnerability_details)
+        item['name'] = vulnerability_details
+        item['language'] = 'cn'
+
+        #print('#1.1 CNNVD编号：')
+        cnnvd_id = selector.xpath('/html/body/div[4]/div/div[1]/div[2]/ul/li[1]/span/text()')[0].replace('CNNVD编号：', '')
+        print(cnnvd_id)
+        item['cnnvd'] = cnnvd_id
+
+        #print('#1.2 危害等级：')
+        hazard_level = selector.xpath('/html/body/div[4]/div/div[1]/div[2]/ul/li[2]/a/text()')[0].replace('\n', '')
+        #print(hazard_level)
+        item['cvss_base'] = hazard_level
+
+        #print('#1.3 CVE编号：')
+        cve_id = selector.xpath('/html/body/div[4]/div/div[1]/div[2]/ul/li[3]/a/text()')[0].replace('\n', '').replace(' ', '')
+        #print(cve_id)
+        item['cve'] = cve_id
+
+        #print('#1.4 漏洞类型：')
+        vulnerability_type = selector.xpath('/html/body/div[4]/div/div[1]/div[2]/ul/li[4]/a/text()')[0].replace('\n', '').replace('\t', '')
+        #print(vulnerability_type)
+        item['vuldetect'] = vulnerability_type
+
+        #print('#1.5 发布时间：')
+        release_time = selector.xpath('/html/body/div[4]/div/div[1]/div[2]/ul/li[5]/a/text()')[0].replace('\n', '').replace('\t', '')
+        #print(release_time)
+        item['publish_date'] = release_time
+
+        #print('#1.6 威胁类型：')
+        threat_type = selector.xpath('/html/body/div[4]/div/div[1]/div[2]/ul/li[5]/a/text()')[0].replace('\n', '').replace('\t', '')
+        #print(threat_type)
+        item['threat_type'] = threat_type
+        
+        #print('#1.7 更新时间：')
+        update_time = selector.xpath('/html/body/div[4]/div/div[1]/div[2]/ul/li[7]/a/text()')[0].replace('\n', '').replace('\t', '')
+        #print(update_time)
+        item['update_date'] = update_time
+
+        #print('#1.8 厂商：')
+        vendor = selector.xpath('/html/body/div[4]/div/div[1]/div[2]/ul/li[8]/text()')[0].replace('\n', '').replace('\'', '\'\'')
+        #print(vendor)
+        item['company'] = vendor
+
+        #print('#1.9 漏洞来源：')
+        #vulnerability_source = selector.xpath('//*[@id="1"]/text()')[0].replace('\'', '\'\'')
+        #print(vulnerability_source)
+
+        #print('#2 漏洞简介：')
+        vul_source_1 = selector.xpath('/html/body/div[4]/div/div[1]/div[3]/p[1]/text()')[0].replace('\t', '').replace('\'', '\'\'')
+        vul_source_2 = selector.xpath('/html/body/div[4]/div/div[1]/div[3]/p[2]/text()')[0].replace('\t', '').replace('\'', '\'\'')
+        vulnerability_summary = vul_source_1 + vul_source_2
+        #print(vulnerability_summary)
+        item['summary'] = vulnerability_summary
+
+        #print('#3 漏洞公告：')
+        vul_announcement_1 = selector.xpath('/html/body/div[4]/div/div[1]/div[4]/p[1]/text()')[0].replace('\t', '').replace('\'', '\'\'')
+        #vul_2 = selector.xpath('/html/body/div[4]/div/div[1]/div[4]/p[2]/text()')
+        #if 
+        vul_announcement_2 = selector.xpath('/html/body/div[4]/div/div[1]/div[4]/p[2]/text()')[0].replace('\t', '').replace('\'', '\'\'')
+        vulnerability_announcement = vul_announcement_1 + vul_announcement_2
+        #print(vulnerability_announcement)
+        item['solution'] = vulnerability_announcement
+
+        #print('#4 参考网址：')
+        reference_source = selector.xpath('/html/body/div[4]/div/div[1]/div[5]/p[1]/text()')[0].replace('\t', '').replace('\'', '\'\'')
+        reference_link = selector.xpath('/html/body/div[4]/div/div[1]/div[5]/p[2]/text()')[0].replace('\t', '').replace('\'', '\'\'')
+        reference_url = reference_source + reference_link
+        #print(reference_url)
+        item['xref'] = reference_url
+
+        #print('#5 受影响实体：')
+        vulnerability_entity = selector.xpath('/html/body/div[4]/div/div[1]/div[6]/div[3]/text()')[0].replace('\n', '').replace('\t', '').replace('\'', '\'\'')
+        #print(vulnerability_entity)
+        item['affected'] = vulnerability_entity
+
+        #print('#6 补丁：')
+        patch = selector.xpath('//*[@id="pat"]/p/text()')[0].replace('\n', '').replace('\t', '').replace('\'', '\'\'')
+        #print(patch)
+        item['patch'] = patch
+
+        #print('+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++')
+        return item
