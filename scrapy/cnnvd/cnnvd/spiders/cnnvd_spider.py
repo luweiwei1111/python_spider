@@ -25,6 +25,7 @@ class Myspider(scrapy.Spider):
     def start_requests(self):
         #url = self.bash_url
         count_progress = 0
+        Sql.ctl_tb_cve_cnnvd_cn()
         url_list = Sql.select_url_list()
         for urls in url_list:
             count_progress = count_progress + 1
@@ -38,108 +39,172 @@ class Myspider(scrapy.Spider):
                 continue
             else:
                 print('cnnvd->' + cnnvd + '需要扫描')
+                print('cnnvd->' + cnnvd + '数据爬取')
                 yield Request(url, self.get_cnnvd_detail)
-    
-    def get_cnnvd_detail(self, response):
-        #print('+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++')
-        item = CnnvdItem()
 
-        selector = etree.HTML(response.text)
-        #print('#####漏洞信息详情：')
-        #print('#1 标题')
-        vulnerability_details = selector.xpath('/html/body/div[4]/div/div[1]/div[2]/h2/text()')[0].replace('\'', '\'\'')
-        #print(vulnerability_details)
-        item['name'] = vulnerability_details
+    def get_cnnvd_detail(self, response):
+        print('+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++')
+        item = CnnvdItem()
+        #print(response.text)
+        
+        ######1.CVE#############################################
+        print('#1.cve编号:')
+        cve_list = BeautifulSoup(response.text, 'lxml').find_all('a', href=re.compile("cve.mitre.org"))
+        if len(cve_list) != 0:
+            cve = cve_list[0].text.replace('\n', '').replace(' ', '')
+        else:
+            cve = 'null'
+        print(cve)
+        item['cve'] = cve
+
+        ######2.language#############################################
+        print('#2.language:cn')
         item['language'] = 'cn'
 
-        #print('#1.1 CNNVD编号：')
-        cnnvd_id = selector.xpath('/html/body/div[4]/div/div[1]/div[2]/ul/li[1]/span/text()')[0].replace('CNNVD编号：', '')
-        print(cnnvd_id)
-        item['cnnvd'] = cnnvd_id
-
-        #print('#1.2 危害等级：')
-        hazard_level = selector.xpath('/html/body/div[4]/div/div[1]/div[2]/ul/li[2]/a/text()')[0].replace('\n', '')
-        #print(hazard_level)
-        item['cvss_base'] = hazard_level
-
-        #print('#1.3 CVE编号：')
-        cve_id = selector.xpath('/html/body/div[4]/div/div[1]/div[2]/ul/li[3]/a/text()')[0].replace('\n', '').replace(' ', '')
-        #print(cve_id)
-        item['cve'] = cve_id
-
-        #print('#1.4 漏洞类型：')
-        vulnerability_type = selector.xpath('/html/body/div[4]/div/div[1]/div[2]/ul/li[4]/a/text()')[0].replace('\n', '').replace('\t', '')
-        #print(vulnerability_type)
-        item['vuldetect'] = vulnerability_type
-
-        #print('#1.5 发布时间：')
-        release_time = selector.xpath('/html/body/div[4]/div/div[1]/div[2]/ul/li[5]/a/text()')[0].replace('\n', '').replace('\t', '')
-        #print(release_time)
-        item['publish_date'] = release_time
-
-        #print('#1.6 威胁类型：')
-        threat_type = selector.xpath('/html/body/div[4]/div/div[1]/div[2]/ul/li[5]/a/text()')[0].replace('\n', '').replace('\t', '')
-        #print(threat_type)
-        item['threat_type'] = threat_type
+        ######3.name#############################################
+        print('3.标题：')
+        #/html/body/div[4]/div[1]/div/div[2]/h2/text()
+        #/html/body/div[4]/div[1]/div/div[2]/h2/div
+        selector = etree.HTML(response.text)
+        title1 = selector.xpath('/html/body/div[4]/div[1]/div/div[2]/h2/text()')
+        name = ''
+        if len(title1) != 0:
+            name = title1[0]
         
-        #print('#1.7 更新时间：')
-        update_time = selector.xpath('/html/body/div[4]/div/div[1]/div[2]/ul/li[7]/a/text()')[0].replace('\n', '').replace('\t', '')
-        #print(update_time)
-        item['update_date'] = update_time
+        title2 = selector.xpath('/html/body/div[4]/div[1]/div/div[2]/h2/div/text()')
+        if len(title2) != 0:
+            name = name + title2[0]
+        print(name)
+        item['name'] = name.replace('\n', '')
 
-        #print('#1.8 厂商：')
-        vendor = selector.xpath('/html/body/div[4]/div/div[1]/div[2]/ul/li[8]/text()')[0].replace('\n', '').replace('\'', '\'\'')
-        #print(vendor)
-        item['company'] = vendor
-
-        #print('#1.9 漏洞来源：')
-        #vulnerability_source = selector.xpath('//*[@id="1"]/text()')[0].replace('\'', '\'\'')
-        #print(vulnerability_source)
-
-        #print('#2 漏洞简介：')
-        vul_source_1 = selector.xpath('/html/body/div[4]/div/div[1]/div[3]/p[1]/text()')[0].replace('\t', '').replace('\'', '\'\'')
-        vul_source_2 = selector.xpath('/html/body/div[4]/div/div[1]/div[3]/p[2]/text()')#[0].replace('\t', '').replace('\'', '\'\'')
-        if len(vul_source_2) == 0:
-            print('vul_source_2 is null')
-            vulnerability_summary = vul_source_1# + vul_source_2
+        ######4.cnnvd#############################################
+        print('4.CNNVD编号：')
+        cnnvd = ''
+        span_list = BeautifulSoup(response.text, 'lxml').find_all('span')
+        for i in range(0, len(span_list)):
+            span_text = span_list[i].text
+            if 'CNNVD编号：' in span_text:
+                cnnvd = span_text.replace('CNNVD编号：', '')
+                break
+        print(cnnvd)
+        if len(cnnvd) != 0:
+            item['cnnvd'] = cnnvd
         else:
-            vulnerability_summary = vul_source_1 + vul_source_2[0].replace('\t', '').replace('\'', '\'\'')
-        #print(vulnerability_summary)
-        item['summary'] = vulnerability_summary
+            print('#ERROR#cnnvd null')
+            return
 
-        #print('#3 漏洞公告：')
-        vul_announcement_1 = selector.xpath('/html/body/div[4]/div/div[1]/div[4]/p[1]/text()')[0].replace('\t', '').replace('\'', '\'\'')
-        vul_announcement_2 = selector.xpath('/html/body/div[4]/div/div[1]/div[4]/p[2]/text()')#[0].replace('\t', '').replace('\'', '\'\'')
-        if len(vul_announcement_2) == 0:
-            print('vul_announcement_2 is null')
-            vulnerability_announcement = vul_announcement_1
+        ######5.publish_date#############################################
+        print('5.发布日期：')
+        publish_date = ''
+        date_list = BeautifulSoup(response.text, 'lxml').find_all('a', href=re.compile("qstartdateXq"))
+        if len(date_list) != 0:
+            publish_date = date_list[0].text.replace(' ', '').replace('\n', '').replace('\t', '')
         else:
-            vulnerability_announcement = vul_source_1 + vul_announcement_2[0].replace('\t', '').replace('\'', '\'\'')
-        #print(vulnerability_announcement)
-        item['solution'] = vulnerability_announcement
+            print('#ERROR#publish_date null')
+        print(publish_date)
+        item['publish_date'] = publish_date
 
-        #print('#4 参考网址：')
-        reference_source = selector.xpath('/html/body/div[4]/div/div[1]/div[5]/p[1]/text()')[0].replace('\t', '').replace('\'', '\'\'')
-        reference_link = selector.xpath('/html/body/div[4]/div/div[1]/div[5]/p[2]/text()')#[0].replace('\t', '').replace('\'', '\'\'')
-        if len(reference_link) == 0:
-            reference_url = reference_source
+        ######6.update_date#############################################
+        print('6.更新时间：')
+        update_date = ''
+        date_list = BeautifulSoup(response.text, 'lxml').find_all('a', href=re.compile("cvCnnvdUpdatedateXq"))
+        if len(date_list) != 0:
+            update_date = date_list[0].text.replace(' ', '').replace('\n', '').replace('\t', '')
         else:
-            reference_url = reference_source + reference_link[0].replace('\t', '').replace('\'', '\'\'')
-        #print(reference_url)
-        item['xref'] = reference_url
+            print('#ERROR#update_date null')
+        print(update_date)
+        item['update_date'] = update_date
 
-        #print('#5 受影响实体：')
-        vulnerability_entity = selector.xpath('/html/body/div[4]/div/div[1]/div[6]/div[3]/text()')#[0].replace('\n', '').replace('\t', '').replace('\'', '\'\'')
-        if len(vulnerability_entity) == 0:
-            item['affected'] = ' '
-        else:
-            #print(vulnerability_entity)
-            item['affected'] = vulnerability_entity[0].replace('\n', '').replace('\t', '').replace('\'', '\'\'')
+        ######7.cvss_base#############################################
+        #print(response.text)
+        print('7.危害等级：')
+        cvss_base = ''
+        a_list = BeautifulSoup(response.text, 'lxml').find_all('a', onclick=re.compile("cvHazardRating"))
+        print(a_list)
+        if len(a_list) != 0:
+            cvss_base = a_list[0].text.replace('\n', '').replace(' ', '')
+        print(cvss_base)
+        item['cvss_base'] = cvss_base
 
-        #print('#6 补丁：')
-        patch = selector.xpath('//*[@id="pat"]/p/text()')[0].replace('\n', '').replace('\t', '').replace('\'', '\'\'')
+        ######8.vuldetect#############################################
+        print('8.漏洞类型')
+        vuldetect = ''
+        a_list = BeautifulSoup(response.text, 'lxml').find_all('a', onclick=re.compile("cvVultype"))
+        if len(a_list) != 0:
+            vuldetect = a_list[0].text.replace('\n', '').replace(' ', '').replace('\t', '')
+        print(vuldetect)
+        item['vuldetect'] = vuldetect
+
+        ######9.threat_type#############################################
+        print('9.威胁类型：')
+        threat_type = ''
+        a_list = BeautifulSoup(response.text, 'lxml').find_all('a', onclick=re.compile("cvUsedStyle"))
+        if len(a_list) != 0:
+            threat_type = a_list[0].text.replace('\n', '').replace(' ', '').replace('\t', '')
+        print(threat_type)
+        item['threat_type'] = threat_type
+
+        ######10.company#############################################
+        print('10.厂商：')
+        #/html/body/div[4]/div[1]/div/div[2]/ul/li[8]/a
+        company = selector.xpath('/html/body/div[4]/div[1]/div/div[2]/ul/li[8]/text')#[0].text()
+        print(company)
+        item['company'] = 'company'
+
+        ######11.summary#############################################
+        print('11.漏洞简介：')
+        summary = ''
+        p_list = BeautifulSoup(response.text, 'lxml').find('div', class_='d_ldjj').find_all('p')
+        if len(p_list) != 0:
+            summary = p_list[0].text
+        print(summary)
+        item['summary'] = Sql.sqliteEscape(summary)
+        len_p = len(p_list)
+        print('len=' + str(len_p))
+
+        ######12.solution#############################################
+        print('12.漏洞公告：')
+        solution = ''
+        #p_list = BeautifulSoup(response.text, 'lxml').find('div', class_='d_ldjj').find_all('p')
+        if len(p_list) >= 2:
+            solution = p_list[1].text
+        print(solution)
+        item['solution'] = Sql.sqliteEscape(solution)
+
+        ######13.xref#############################################
+        print('13.参考网址：')
+        xref = ''
+        #p_list = BeautifulSoup(response.text, 'lxml').find('div', class_='d_ldjj').find_all('p')
+        if len(p_list) >= 3:
+            xref = p_list[2].text
+        print(xref)
+        item['xref'] = Sql.sqliteEscape(xref)
+
+        ######14.affected#############################################
+        print('14.影响实体')
+        affected = ''
+        a_list = BeautifulSoup(response.text, 'lxml').find_all('a', class_='a_title2')#.find_all('p')
+        if len(a_list) != 0:
+            affected = a_list[0].text
+        print(affected)
+        item['affected'] = Sql.sqliteEscape(affected)
+
+        ######15.patch#############################################
+        print('15.补丁：')
+        #//*[@id="pat"]/p/text()
+        #/html/body/div[4]/div/div[1]/div[7]/div[3]/text()
+        patch_0 = selector.xpath('//*[@id="pat"]/p/text()')
         #print(patch)
-        item['patch'] = patch
+        if len(patch_0) == 0:
+            patch_1 = selector.xpath('/html/body/div[4]/div/div[1]/div[7]/div[3]/text()')
+            if len(patch_1) == 0:
+                patch = 'null'
+            else:
+                patch = patch_1[0]
+        else:
+            patch = patch_0[0]
+        print(patch)
+        item['patch'] = Sql.sqliteEscape(patch)
 
-        #print('+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++')
+        print('+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++')
         return item

@@ -29,7 +29,7 @@ ROBOTSTXT_OBEY = True
 # See also autothrottle settings and docs
 # 设置下载延迟
 # 原理：网站会通过我们对网页的访问频率进行分析，此时我们只需要控制一下爬行的时间间隔。
-# DOWNLOAD_DELAY = 2
+DOWNLOAD_DELAY = 3
 
 # The download delay setting will honor only one of:
 #CONCURRENT_REQUESTS_PER_DOMAIN = 16
@@ -116,9 +116,10 @@ SQLITE3_DB = 'cnnvd.db'
 # 设置IP池
 IPPOOL = [
     #{"ipaddr":"47.105.144.119:80"},
-    {"ipaddr":"61.150.113.28:8908"},
-    {"ipaddr":"27.208.82.98:8060"},
-    {"ipaddr":"39.135.11.97:8080"},
+    {"ipaddr":"47.95.50.158:80"},
+    {"ipaddr":"47.94.230.42:9999"},
+    {"ipaddr":"47.106.122.223:8888"},
+    #{"ipaddr":"118.190.95.35:9001"},
     #{"ipaddr":"222.223.40.221:8060"},
     #{"ipaddr":"47.105.149.45:80"},
     #{"ipaddr":"60.217.154.47:8060"},
@@ -128,6 +129,12 @@ IPPOOL = [
 ]
 
 """
+39.137.140.208:8080
+119.180.128.249:8060
+39.137.140.143:80
+110.167.30.50:8060
+47.93.120.94:9898
+113.116.123.190:9000
 http://ip.zdaye.com/dayProxy/ip/133009.html
 站大爷
 47.105.144.119:80@HTTP#[透明]浙江省杭州市 阿里云

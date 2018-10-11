@@ -16,7 +16,7 @@ SQLITE3_DB = settings.SQLITE3_DB
 #cnx = pymysql.connect(user=MYSQL_USER, password=MYSQL_PASSWORD, host=MYSQL_HOSTS, database=MYSQL_DB)
 #cur = cnx.cursor(buffered=True)
 #cur = cnx.cursor()
-cnx = sqlite3.connect(SQLITE3_DB)
+cnx = sqlite3.connect(SQLITE3_DB, check_same_thread = False)
 cur = cnx.cursor()
 """
 CREATE TABLE cve_cnnvd_cn(
@@ -57,7 +57,7 @@ class Sql:
              xref             TEXT,   \
              affected         TEXT,   \
              patch            TEXT,   \
-             PRIMARY KEY (cve));'
+             PRIMARY KEY (cnnvd));'
 
         #print(crt_tb_sql)
         cur.execute(crt_tb_sql)
@@ -76,27 +76,16 @@ class Sql:
 
     @classmethod
     def insert_cve_cnnvd_cn(cls, cve, language, name, cnnvd, publish_date, update_date, cvss_base, vuldetect, threat_type, company, summary, solution, xref, affected, patch):
-        sql = "INSERT INTO cve_cnnvd_cn(cve, language, name, cnnvd, publish_date, update_date, cvss_base, vuldetect, threat_type, company, summary, solution, xref, affected, patch)  VALUES(" + \
-            "'" + cve + "'," + \
-            "'" + language + "'," + \
-            "'" + name + "'," + \
-            "'" + cnnvd + "'," + \
-            "'" + publish_date + "'," + \
-            "'" + update_date + "'," + \
-            "'" + cvss_base + "'," + \
-            "'" + vuldetect + "'," + \
-            "'" + threat_type + "'," + \
-            "'" + company + "'," + \
-            "'" + summary + "'," + \
-            "'" + solution + "'," + \
-            "'" + xref + "'," + \
-            "'" + affected + "'," + \
-            "'" + patch + "');"
-    
+        sql = ''
+        #sql = "INSERT INTO cve_cnnvd_cn(cve, language, name, cnnvd, publish_date, update_date, cvss_base, vuldetect, threat_type, company, summary, solution, xref, affected, patch)  " + \
+        sql = 'INSERT INTO cve_cnnvd_cn VALUES( \'%s\', \'%s\', \'%s\', \'%s\', \'%s\', \'%s\', \'%s\', \'%s\', \'%s\', \'%s\', \'%s\', \'%s\', \'%s\', \'%s\', \'%s\');' % (cve, language, name, cnnvd, publish_date, update_date, cvss_base, vuldetect, threat_type, company, summary, solution, xref, affected, patch)
+        
+        print('+++++++开始保存数据+++++++' + cnnvd)
+        print(sql)
         try:
             cur.execute(sql)
         except:
-            print('#ERROR#insert cve_cnnvd_cn sql error', sql)
+            print('#ERROR#insert cve_cnnvd_cn sql error:' + sql)
         cnx.commit()
 
     @classmethod
@@ -109,7 +98,7 @@ class Sql:
         try:
             cur.execute(sql)
         except:
-            print('#ERROR#insert cnnvd_url sql error:', sql)
+            print('#ERROR#insert cnnvd_url sql error:' + sql)
         cnx.commit()
 
     @classmethod
@@ -144,8 +133,12 @@ class Sql:
     def select_url_list(cls):
         #select t1.cnnvd_url from cnnvd_url t1 where not exists (select * from cve_cnnvd_cn t2 where t1.cnnvd = t2.cnnvd)
         #sql = 'select t1.url from cnnvd_url t1 where not exists (select * from cve_cnnvd_cn t2 where t1.cnnvd = t2.cnnvd);'
-        #sql = 'select url from cnnvd_url order by url LIMIT 11;'
-        sql = 'select url from cnnvd_url order by url;'
+        #sql = 'select url from cnnvd_url order by url LIMIT 200;'
+        sql = 'select url from cnnvd_url ;'#where cnnvd = \'CNNVD-201810-491\';'
         #print(sql)
         cur.execute(sql)
         return cur.fetchall()
+
+    @classmethod
+    def sqliteEscape(cls, keyWord):
+        return keyWord.replace("/", "//").replace("'", "''").replace("[", "/[").replace("]", "/]").replace("%", "/%").replace("&","/&").replace("_", "/_").replace("(", "/(").replace(")", "/)")

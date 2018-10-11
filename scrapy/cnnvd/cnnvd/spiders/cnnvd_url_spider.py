@@ -37,10 +37,10 @@ class Myspider(scrapy.Spider):
         #max_num = 2
 
         for num in range(1, int(max_num) + 1):
-            if num == 1:
-                url = bashurl
-            else:
-                url = bashurl + '?pageno=' + str(num) + self.bashurl
+            #if num == 1:
+            #    url = bashurl
+            #else:
+            url = bashurl + '?pageno=' + str(num) + self.bashurl
             print('##url:' + url)
             print('############progress:' + str(num))
             #查询url是否已经扫描成功
