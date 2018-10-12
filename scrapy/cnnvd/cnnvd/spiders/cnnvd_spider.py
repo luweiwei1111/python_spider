@@ -45,8 +45,11 @@ class Myspider(scrapy.Spider):
     def get_cnnvd_detail(self, response):
         print('+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++')
         item = CnnvdItem()
+        selector = etree.HTML(response.text)
         #print(response.text)
         
+        #cve_list = selector.xpath('html/body/div[@class="container"]/div[@class="container"]/div[@class="fl"]/div[@class="detail_xq"]/ul/li[2]/a/text()')
+        #print(cve_list)
         ######1.CVE#############################################
         print('#1.cve编号:')
         cve_list = BeautifulSoup(response.text, 'lxml').find_all('a', href=re.compile("cve.mitre.org"))
@@ -65,17 +68,26 @@ class Myspider(scrapy.Spider):
         print('3.标题：')
         #/html/body/div[4]/div[1]/div/div[2]/h2/text()
         #/html/body/div[4]/div[1]/div/div[2]/h2/div
-        selector = etree.HTML(response.text)
         title1 = selector.xpath('/html/body/div[4]/div[1]/div/div[2]/h2/text()')
         name = ''
         if len(title1) != 0:
             name = title1[0]
-        
+
         title2 = selector.xpath('/html/body/div[4]/div[1]/div/div[2]/h2/div/text()')
         if len(title2) != 0:
             name = name + title2[0]
         print(name)
         item['name'] = name.replace('\n', '')
+        """
+        name = ''
+        p_list = BeautifulSoup(response.text, 'lxml').find('div', class_='detail_xq w770').find_all('h2')
+        #print(p_list)
+        for p_text in p_list:
+            name = name + p_text.text
+        print(name)
+        item['name'] = Sql.sqliteEscape(name)
+        """
+
 
         ######4.cnnvd#############################################
         print('4.CNNVD编号：')
@@ -120,7 +132,7 @@ class Myspider(scrapy.Spider):
         print('7.危害等级：')
         cvss_base = ''
         a_list = BeautifulSoup(response.text, 'lxml').find_all('a', onclick=re.compile("cvHazardRating"))
-        print(a_list)
+        #print(a_list)
         if len(a_list) != 0:
             cvss_base = a_list[0].text.replace('\n', '').replace(' ', '')
         print(cvss_base)
@@ -146,51 +158,63 @@ class Myspider(scrapy.Spider):
 
         ######10.company#############################################
         print('10.厂商：')
-        #/html/body/div[4]/div[1]/div/div[2]/ul/li[8]/a
-        company = selector.xpath('/html/body/div[4]/div[1]/div/div[2]/ul/li[8]/text')#[0].text()
+        company = ''
+        p_list = BeautifulSoup(response.text, 'lxml').find('span', text=re.compile("商：")).find(text=re.compile("厂")).find_parent().find_parent()
+        company = p_list.text.replace('厂       商：', '')
         print(company)
-        item['company'] = 'company'
+        item['company'] = Sql.sqliteEscape(company)
 
         ######11.summary#############################################
         print('11.漏洞简介：')
         summary = ''
-        p_list = BeautifulSoup(response.text, 'lxml').find('div', class_='d_ldjj').find_all('p')
-        if len(p_list) != 0:
-            summary = p_list[0].text
+        p_list = BeautifulSoup(response.text, 'lxml').find('h2', text=(u"漏洞简介")).find_parent().find_parent().find_all('p')
+        #print(p_list)
+        for p_text in p_list:
+            summary = summary + p_text.text
         print(summary)
         item['summary'] = Sql.sqliteEscape(summary)
-        len_p = len(p_list)
-        print('len=' + str(len_p))
 
         ######12.solution#############################################
         print('12.漏洞公告：')
         solution = ''
-        #p_list = BeautifulSoup(response.text, 'lxml').find('div', class_='d_ldjj').find_all('p')
-        if len(p_list) >= 2:
-            solution = p_list[1].text
+        p_list = BeautifulSoup(response.text, 'lxml').find('h2', text=(u"漏洞公告")).find_parent().find_parent().find_all('p')
+        #print(p_list)
+        for p_text in p_list:
+            solution = solution + p_text.text
         print(solution)
         item['solution'] = Sql.sqliteEscape(solution)
 
         ######13.xref#############################################
         print('13.参考网址：')
         xref = ''
-        #p_list = BeautifulSoup(response.text, 'lxml').find('div', class_='d_ldjj').find_all('p')
-        if len(p_list) >= 3:
-            xref = p_list[2].text
+        p_list = BeautifulSoup(response.text, 'lxml').find('h2', text=(u"参考网址")).find_parent().find_parent().find_all('p')
+        #print(p_list)
+        for p_text in p_list:
+            xref = xref + p_text.text
         print(xref)
         item['xref'] = Sql.sqliteEscape(xref)
 
         ######14.affected#############################################
         print('14.影响实体')
         affected = ''
-        a_list = BeautifulSoup(response.text, 'lxml').find_all('a', class_='a_title2')#.find_all('p')
-        if len(a_list) != 0:
-            affected = a_list[0].text
+        p_list = BeautifulSoup(response.text, 'lxml').find('h2', text=(u"受影响实体")).find_parent().find_parent().find_all('p')
+        #print(p_list)
+        for p_text in p_list:
+            affected = affected + p_text.text
         print(affected)
         item['affected'] = Sql.sqliteEscape(affected)
 
         ######15.patch#############################################
         print('15.补丁：')
+        """
+        patch = ''
+        p_list = BeautifulSoup(response.text, 'lxml').find('h2', text=(u"补丁：")).find_parent().find_parent().find_all('p')
+        #print(p_list)
+        for p_text in p_list:
+            patch = patch + p_text.text
+        print(patch)
+        item['patch'] = Sql.sqliteEscape(patch)
+        """
         #//*[@id="pat"]/p/text()
         #/html/body/div[4]/div/div[1]/div[7]/div[3]/text()
         patch_0 = selector.xpath('//*[@id="pat"]/p/text()')

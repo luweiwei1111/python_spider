@@ -68,3 +68,8 @@ class CnnvdUrlItem(scrapy.Item):
     # 3.name
     ok = scrapy.Field()
     #pass
+
+class CnnvdProxyItem(scrapy.Item):
+    # define the fields for your item here like:
+    # 1.cve
+    ip_port = scrapy.Field()

@@ -2,7 +2,7 @@ from .sql import Sql
 from twisted.internet.threads import deferToThread
 from cnnvd.items import CnnvdItem
 from cnnvd.items import CnnvdUrlItem
-
+from cnnvd.items import CnnvdProxyItem
 """
              cve              TEXT NOT NULL,  'cve'
              language         TEXT NOT NULL,  'cn/en'
@@ -63,4 +63,15 @@ class CnnvdPipeline(object):
                 ok = item['ok']
                 Sql.insert_cnnvd_url(cnnvd, url, ok)
                 print('开始保存cnnvd url')
+                return item
+
+        if isinstance(item, CnnvdProxyItem):
+            ip_port = item['ip_port']
+            ret = Sql.select_ip_port_pool(ip_port)
+            if ret[0] == 1:
+                print('ip_port->' + ip_port + '已经存在了')
+                pass
+            else:
+                Sql.insert_ip_port_pool(ip_port)
+                print('开始保存ip_port_pool')
                 return item

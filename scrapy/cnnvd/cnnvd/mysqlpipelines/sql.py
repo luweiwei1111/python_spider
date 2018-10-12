@@ -75,6 +75,16 @@ class Sql:
         cnx.commit()
 
     @classmethod
+    def ctl_tb_ip_port_pool(cls):
+        #ip_port_pool先删除,后创建
+        #cur.execute('drop table if exists ip_port_pool;')
+        crt_tb_sql = 'CREATE TABLE if not exists ip_port_pool( \
+             id       INTEGER  NOT NULL PRIMARY KEY AUTOINCREMENT,  \
+             ip_port  TEXT NOT NULL);'
+        cur.execute(crt_tb_sql)
+        cnx.commit()
+
+    @classmethod
     def insert_cve_cnnvd_cn(cls, cve, language, name, cnnvd, publish_date, update_date, cvss_base, vuldetect, threat_type, company, summary, solution, xref, affected, patch):
         sql = ''
         #sql = "INSERT INTO cve_cnnvd_cn(cve, language, name, cnnvd, publish_date, update_date, cvss_base, vuldetect, threat_type, company, summary, solution, xref, affected, patch)  " + \
@@ -134,10 +144,37 @@ class Sql:
         #select t1.cnnvd_url from cnnvd_url t1 where not exists (select * from cve_cnnvd_cn t2 where t1.cnnvd = t2.cnnvd)
         #sql = 'select t1.url from cnnvd_url t1 where not exists (select * from cve_cnnvd_cn t2 where t1.cnnvd = t2.cnnvd);'
         #sql = 'select url from cnnvd_url order by url LIMIT 200;'
-        sql = 'select url from cnnvd_url ;'#where cnnvd = \'CNNVD-201810-491\';'
+        sql = 'select url from cnnvd_url;'
+        #where cnnvd = \'CNNVD-201106-070\';'
         #print(sql)
         cur.execute(sql)
         return cur.fetchall()
+
+    @classmethod
+    def insert_ip_port_pool(cls, ip_port):
+        sql = "INSERT INTO ip_port_pool(ip_port)  VALUES('" + ip_port + "');"
+    
+        try:
+            cur.execute(sql)
+        except:
+            print('#ERROR#insert ip_port_pool sql error:' + sql)
+        cnx.commit()
+
+
+    @classmethod
+    def select_ip_port_pool(cls, ip_port):
+        sql = 'SELECT EXISTS(SELECT 1 FROM ip_port_pool WHERE ip_port = \'' + ip_port + '\');'
+        #print(sql)
+        #SELECT * from report_host_details ORDER BY RANDOM () LIMIT 1
+        cur.execute(sql)
+        return cur.fetchall()[0]
+
+    @classmethod
+    def select_ip_port_random(cls):
+        sql = 'SELECT ip_port from ip_port_pool ORDER BY RANDOM () LIMIT 1;'
+        #print(sql)
+        cur.execute(sql)
+        return cur.fetchall()[0]
 
     @classmethod
     def sqliteEscape(cls, keyWord):
