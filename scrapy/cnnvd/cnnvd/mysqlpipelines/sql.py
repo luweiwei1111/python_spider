@@ -145,7 +145,8 @@ class Sql:
         #sql = 'select t1.url from cnnvd_url t1 where not exists (select * from cve_cnnvd_cn t2 where t1.cnnvd = t2.cnnvd);'
         #sql = 'select url from cnnvd_url order by url LIMIT 200;'
         sql = 'select url from cnnvd_url;'
-        #where cnnvd = \'CNNVD-201106-070\';'
+        #  CNNVD-201106-070  CNNVD-201810-569  CNNVD-199907-024 CNNVD-201810-652
+        #sql = 'select url from cnnvd_url where cnnvd = \'CNNVD-201106-070\';'
         #print(sql)
         cur.execute(sql)
         return cur.fetchall()

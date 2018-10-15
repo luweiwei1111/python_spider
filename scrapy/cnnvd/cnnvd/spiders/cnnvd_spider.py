@@ -201,6 +201,11 @@ class Myspider(scrapy.Spider):
         #print(p_list)
         for p_text in p_list:
             affected = affected + p_text.text
+        
+        if affected == '':
+            p_list = BeautifulSoup(response.text, 'lxml').find('h2', text=(u"受影响实体")).find_parent().find_parent().find_all('ul', id='ent')
+            for p_text in p_list:
+                affected = affected + p_text.text
         print(affected)
         item['affected'] = Sql.sqliteEscape(affected)
 
