@@ -19,6 +19,7 @@ class Myspider(scrapy.Spider):
     base_url = 'http://www.cnnvd.org.cn'
     bash_url = 'http://www.cnnvd.org.cn/web/vulnerability/querylist.tag'
     bashurl = '&repairLd='
+    cnnvd = ''
     #num = 2
     #page_num = 11609
 
@@ -31,15 +32,15 @@ class Myspider(scrapy.Spider):
             count_progress = count_progress + 1
             print('############progress:' + str(count_progress))
             url = urls[0]  
-            cnnvd = urls[0].split('=')[1]
+            self.cnnvd = urls[0].split('=')[1]
+
             #查询url是否已经扫描成功
-            ret = Sql.select_cnnvd(cnnvd)
+            ret = Sql.select_cnnvd(self.cnnvd)
             if ret[0] == 1:
-                #print('cnnvd->' + cnnvd + '已经完成扫描,continue ...')
+                #print('cnnvd->' + self.cnnvd + '已经完成扫描,continue ...')
                 continue
             else:
-                print('cnnvd->' + cnnvd + '需要扫描')
-                print('cnnvd->' + cnnvd + '数据爬取')
+                print('cnnvd->' + self.cnnvd + '需要进行扫描、数据爬取')
                 yield Request(url, self.get_cnnvd_detail)
 
     def get_cnnvd_detail(self, response):
@@ -47,16 +48,15 @@ class Myspider(scrapy.Spider):
         item = CnnvdItem()
         selector = etree.HTML(response.text)
         #print(response.text)
-        
-        #cve_list = selector.xpath('html/body/div[@class="container"]/div[@class="container"]/div[@class="fl"]/div[@class="detail_xq"]/ul/li[2]/a/text()')
-        #print(cve_list)
+
         ######1.CVE#############################################
         print('#1.cve编号:')
         cve_list = BeautifulSoup(response.text, 'lxml').find_all('a', href=re.compile("cve.mitre.org"))
         if len(cve_list) != 0:
-            cve = cve_list[0].text.replace('\n', '').replace(' ', '')
+            cve = cve_list[0].text.replace('\n', '').replace(' ', '').replace('\t', '')
         else:
             cve = 'null'
+            print('#ERROR#cve null')
         print(cve)
         item['cve'] = cve
 
@@ -76,8 +76,11 @@ class Myspider(scrapy.Spider):
         title2 = selector.xpath('/html/body/div[4]/div[1]/div/div[2]/h2/div/text()')
         if len(title2) != 0:
             name = name + title2[0]
+        if name == '':
+            print('#ERROR#name null')
+            return 
         print(name)
-        item['name'] = name.replace('\n', '')
+        item['name'] = Sql.sqliteEscape(name)
         """
         name = ''
         p_list = BeautifulSoup(response.text, 'lxml').find('div', class_='detail_xq w770').find_all('h2')
@@ -91,6 +94,9 @@ class Myspider(scrapy.Spider):
 
         ######4.cnnvd#############################################
         print('4.CNNVD编号：')
+        print(self.cnnvd)
+        item['cnnvd'] = self.cnnvd
+        """
         cnnvd = ''
         span_list = BeautifulSoup(response.text, 'lxml').find_all('span')
         for i in range(0, len(span_list)):
@@ -104,6 +110,7 @@ class Myspider(scrapy.Spider):
         else:
             print('#ERROR#cnnvd null')
             return
+        """
 
         ######5.publish_date#############################################
         print('5.发布日期：')

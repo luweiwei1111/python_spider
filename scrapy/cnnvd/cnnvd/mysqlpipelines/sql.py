@@ -91,7 +91,7 @@ class Sql:
         sql = 'INSERT INTO cve_cnnvd_cn VALUES( \'%s\', \'%s\', \'%s\', \'%s\', \'%s\', \'%s\', \'%s\', \'%s\', \'%s\', \'%s\', \'%s\', \'%s\', \'%s\', \'%s\', \'%s\');' % (cve, language, name, cnnvd, publish_date, update_date, cvss_base, vuldetect, threat_type, company, summary, solution, xref, affected, patch)
         
         print('+++++++开始保存数据+++++++' + cnnvd)
-        print(sql)
+        #print(sql)
         try:
             cur.execute(sql)
         except:
@@ -146,7 +146,7 @@ class Sql:
         #sql = 'select url from cnnvd_url order by url LIMIT 200;'
         sql = 'select url from cnnvd_url;'
         #  CNNVD-201106-070  CNNVD-201810-569  CNNVD-199907-024 CNNVD-201810-652
-        #sql = 'select url from cnnvd_url where cnnvd = \'CNNVD-201106-070\';'
+        #sql = 'select url from cnnvd_url where cnnvd = \'CNNVD-199603-001\';'
         #print(sql)
         cur.execute(sql)
         return cur.fetchall()

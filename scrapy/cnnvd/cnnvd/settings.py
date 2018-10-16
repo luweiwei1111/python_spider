@@ -30,7 +30,7 @@ ROBOTSTXT_OBEY = True
 # See also autothrottle settings and docs
 # 设置下载延迟
 # 原理：网站会通过我们对网页的访问频率进行分析，此时我们只需要控制一下爬行的时间间隔。
-DOWNLOAD_DELAY = 3
+# DOWNLOAD_DELAY = 3
 
 # The download delay setting will honor only one of:
 #CONCURRENT_REQUESTS_PER_DOMAIN = 16
@@ -68,7 +68,6 @@ DOWNLOADER_MIDDLEWARES = {
     'cnnvd.middlewares.IPPOOLS':125,
     #'cnnvd.uamid.Uamid':1
 }
-
 
 # Enable or disable extensions
 # See https://doc.scrapy.org/en/latest/topics/extensions.html
