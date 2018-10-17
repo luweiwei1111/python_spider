@@ -1,132 +1,144 @@
 #coding=utf-8
-#import urllib.request
-import urllib2
-from HandleJs import Py4Js    
-from translate import Translator
-import requests
+from google_translate import GoogleTranslate
+from sqlite3_sql import Sql
 
-# Example: find_last('aaaa', 'a') returns 3
-# Make sure your procedure has a return statement.
-def find_last(string,str):
-    last_position=-1
-    while True:
-        position=string.find(str,last_position+1)
-        if position==-1:
-            return last_position
-        last_position=position
+if __name__ == "__main__":      
+    google_translate = GoogleTranslate()
 
-def open_url(url):    
-    headers = {'User-Agent':'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:23.0) Gecko/20100101 Firefox/23.0'}      
-    req = urllib2.Request(url = url,headers=headers)    
-    response = urllib2.urlopen(req)    
-    data = response.read().decode('utf-8')    
-    return data    
+    content = """
+    The version of IBM WebSphere Portal installed on the remote host is
+7.0.0.x prior to 7.0.0.2 CF29. It is, therefore, affected by multiple
+vulnerabilities :
 
-def translate_core(content,tk, language):    
-    if len(content) > 4891:    
-        print("too long byte >4891")
-        return
+  - A remote code execution vulnerability exists in the
+    Apache Struts ClassLoader. A remote attacker can exploit
+    this issue by manipulating the 'class' parameter of an
+    ActionForm object to execute arbitrary code.
+    (CVE-2014-0114)
 
-    content = urllib2.quote(content)    
+  - A cross-site scripting vulnerability exists which allows
+    a remote, authenticated attacker to inject arbitrary
+    web script or HTML. (CVE-2014-0910)
 
-    if language == 'de':
-        url = "http://translate.google.cn/translate_a/single?client=t"+ "&sl=de&tl=zh-CN&hl=zh-CN&dt=at&dt=bd&dt=ex&dt=ld&dt=md&dt=qca"+"&dt=rw&dt=rm&dt=ss&dt=t&ie=UTF-8&oe=UTF-8&clearbtn=1&otf=1&pc=1"+"&srcrom=0&ssel=0&tsel=0&kc=2&tk=%s&q=%s"%(tk,content)    
-    else:
-        url = "http://translate.google.cn/translate_a/single?client=t"+ "&sl=en&tl=zh-CN&hl=zh-CN&dt=at&dt=bd&dt=ex&dt=ld&dt=md&dt=qca"+"&dt=rw&dt=rm&dt=ss&dt=t&ie=UTF-8&oe=UTF-8&clearbtn=1&otf=1&pc=1"+"&srcrom=0&ssel=0&tsel=0&kc=2&tk=%s&q=%s"%(tk,content)    
+  - An unspecified denial of service vulnerability exists
+    that allows a remote attacker to crash the host by
+    sending a specially crafted web request to cause a
+    consumption of resources. (CVE-2014-0949)
 
-    #result为json格式
-    result = open_url(url)    
-    #print('results:' + result)
+  - A cross-site scripting vulnerability exists in the
+    'boot_config.jsp' script due to improper validation of
+    user-supplied input. An attacker can exploit this issue
+    to execute arbitrary script code in the security context
+    of a user's browser to steal authentication cookies.
+    (CVE-2014-0952)
 
-    if len(content) < 10:
-        end = result.find("\",")  
-        if end > 4:  
-            return result[4:end]
-    else:
-        result_all = ''
-        if language == 'de':
-            result_all = result.split(',null,"de",null,null,')[0].replace('[[', '').replace(']]', ']')[1:]
-        else:
-            result_all = result.split(',null,"en",null,null,')[0].replace('[[', '').replace(']]', ']')[1:]
-        
-        #print('result_all:' + result_all)
+  - An unspecified cross-site scripting vulnerability exists
+    due to improper validation of user-supplied input.
+    (CVE-2014-0953)
 
-        output_cn = ''
-        #解析中文字段并拼接
-        list = result_all.split('],[')
-        for i in range(len(list)-1):
-            end = list[i].find("\",")
-            tmp_buf = list[i][1:end]
-            output_cn = output_cn + tmp_buf
-        return output_cn
+  - A privilege escalation vulnerability exists in the Web
+    Content Viewer portlet due to improper handling of JSP
+    includes. A remote attacker can exploit this issue to
+    obtain sensitive information, cause a denial of service,
+    or control the request dispatcher by sending a specially
+    crafted URL request. (CVE-2014-0954)
 
-def translate_normal(content, language):    
-    js = Py4Js()    
+  - An unspecified cross-site scripting vulnerability exists
+    due to improper validation of user-supplied input. An
+    attacker can exploit this issue to execute arbitrary
+    script code in the security context of a user's web
+    browser to steal authentication cookies. (CVE-2014-0956)
 
-    tk = js.getTk(content)
-    #print('english:' + content)
-    cn_buf = translate_core(content,tk, language)
+  - An unspecified denial of service vulnerability exists
+    that allows an authenticated attacker to cause a
+    successful login to loop back to the login page
+    indefinitely. (CVE-2014-0959)
 
-    #print('Chinese:' + cn_buf)
-    return cn_buf
+  - An unspecified information disclosure vulnerability
+    exists which allows a remote attacker to gain access to
+    sensitive information. (CVE-2014-3083)
 
-def translate_cn(content, language):
-    LEN_LIMIT = 4891
-    all_len = len(content)
-    print('en:' + content)
-    if all_len > LEN_LIMIT:
-        content_cn = ''
-        while True:
-            content_limit = content[0:LEN_LIMIT]
-            limit_end = find_last(content_limit, '.') + 1
-            #print('limit_end:' + str(limit_end))
-            if limit_end == 0:
-                limit_end = find_last(content_limit, ' ') + 1
-                if limit_end == 0:
-                    limit_end = LEN_LIMIT
-            content_en = content[0:limit_end]
-            leave_len = all_len - limit_end
-            if content_en == '':
-                break;
-            #print('content_en:' + content_en)
-            content_cn = content_cn + translate_normal(content_en, language);
-            content = content[limit_end:]
- 
-        return content_cn
-    else:
-        return translate_normal(content, language)
+  - An unspecified cross-site scripting vulnerability
+    exists due to improper validation of user-supplied
+    input. An attacker can exploit this issue to execute
+    arbitrary script code in the security context of a
+    user's browser. (CVE-2014-3102)
 
-#google api, per 1000 words everyday
-def translate_cn_api(content):
-    translator= Translator(to_lang="zh")
-    translation = translator.translate(content)
-    return translation
+  - An information disclosure vulnerability exists due to
+    the returned error codes which an attacker can use to
+    identify devices behind a firewall. (CVE-2014-4746)
 
-if __name__ == "__main__":  
-    content = """Beautiful is better than ugly.
-        Explicit is better than implicit.
-        Simple is better than complex.
-        Complex is better than complicated.
-        Namespaces are one honking great idea -- let's do more of those!"""
+  - An unspecified open redirect vulnerability exists that
+    allows an attacker to perform a phishing attack by
+    enticing a user to click on a malicious URL.
+    (CVE-2014-4760)
 
-    #
-    content = """    
-    IT-Grundschutz M5.131: Absicherung von IP-Protokollen unter Windows Server 2003.
+  - An information disclosure vulnerability exists which
+    allows a remote, authenticated attacker to gain access
+    to sensitive information, such as user credentials,
+    through certain HTML pages. (CVE-2014-4761)
 
-ACHTUNG: Dieser Test wird nicht mehr unterstützt. Er wurde ersetzt durch
-den entsprechenden Test der nun permanent and die aktuelle EL angepasst
-wird: OID 1.3.6.1.4.1.25623.1.0.95074
+  - An unrestricted file upload vulnerability exists which
+    allows a remote, authenticated attacker to upload large
+    files, potentially resulting in a denial of service.
+    (CVE-2014-4792)
 
-Stand: 13. Ergänzungslieferung (13. EL)."""
-    #content = 'High'
-    content = """Beautiful is better than ugly.
-        Explicit is better than implicit.
-        Simple is better than complex.
-        Complex is better than complicated.
-        Namespaces are one honking great idea -- let's do more of those!"""
-    language = 'en'
-    
-    test = translate_cn(content.replace('\n', ''), language)
-    print('ok:' + test)
+  - An unspecified vulnerability exists that allows an
+    authenticated attacker to execute arbitrary code on the
+    system. (CVE-2014-4808)
 
-    #content = 'Checks version'
+  - A flaw exists due to improper recursion detection during
+    entity expansion. A remote attacker, via a specially
+    crafted XML document, can cause the system to crash,
+    resulting in a denial of service. (CVE-2014-4814)
+
+  - An information disclosure vulnerability exists that
+    allows a remote attacker to identify whether or not a
+    file exists based on the web server error codes.
+    (CVE-2014-4821)
+
+  - An unspecified cross-site scripting vulnerability exists
+    that allows a remote, authenticated attacker to execute
+    arbitrary code via a specially crafted URL.
+    (CVE-2014-6093)
+
+  - An unspecified reflected cross-site scripting
+    vulnerability exists due to improper validation of
+    user-supplied input. A remote attacker can exploit this
+    flaw using a specially crafted URL to execute arbitrary
+    script code in a user's web browser within the security
+    context of the hosting website. This allows an attacker
+    to steal a user's cookie-based authentication
+    credentials. (CVE-2014-6215)
+
+  - An unspecified reflected cross-site scripting
+    vulnerability exists due to improper validation of
+    user-supplied input. A remote attacker can exploit this
+    flaw using a specially crafted URL to execute arbitrary
+    script code in a user's web browser within the security
+    context of the hosting website. This allows an attacker
+    to steal a user's cookie-based authentication
+    credentials. (CVE-2014-8909)
+
+  - An unspecified flaw exists that is trigged when handling
+    Portal requests. A remote attacker can exploit this to
+    cause a consumption of CPU resources, resulting in a
+    denial of service condition. (CVE-2015-1943)
+    """
+
+    desc = google_translate.translate_cn(content, 'en')
+    print(desc)
+"""
+    #update family
+    family_cn = ''
+    family_info = Sql.select_family()
+    for familys in family_info:
+        family = familys[0]
+        print(family)
+        family_cn = google_translate.translate_cn(family, 'en')
+        print(family_cn)
+        Sql.update_family_cn(family_cn, family)
+
+    #对于不符合规范的翻译进行人工校准
+    Sql.update_family_auth()
+    """

@@ -1,16 +1,14 @@
 #coding=utf-8
-import urllib2
+import urllib.request
 from HandleJs import Py4Js
 import threading
 import sqlite3
-import sys
 import time
-from translate import Translator
-
+from google_translate import GoogleTranslate
 import sys
-reload(sys)
-sys.setdefaultencoding('utf-8')
-
+import importlib
+importlib.reload(sys)
+#sys.setdefaultencoding('utf8')
 
 """
 使用Google翻译nvts表中的
@@ -40,7 +38,8 @@ def nomal_data_proc(threadName, conn, min, max):
     print(threadName + ' sql:' + sql)
     cur.execute(sql)
     results = cur.fetchall()
-    data_process(results, cur)
+    data_process(results, cur, conn)
+    conn.commit()
 
 def upgrate_tag(cu):
     #更新tag数据
@@ -194,6 +193,7 @@ def crt_tbl_blog_blogspost(cu, max_num, flag, all_data_flag):
     del_sql = 'delete  from blog_blogspost  where not exists (select * from nvts  where nvts.oid =blog_blogspost.oid);'
     add_sql = 'insert into blog_blogspost(oid,name,tag,family) select t1.oid,t1.name,t1.tag,t1.family from nvts t1 where not exists (select * from blog_blogspost t2 where t1.oid = t2.oid)'
     #创建oid的索引
+    print('#############update###############')
     try:
         print(nvts_oid_index)
         cu.execute(nvts_oid_index)
@@ -218,6 +218,7 @@ def crt_tbl_blog_blogspost(cu, max_num, flag, all_data_flag):
     except:
         print('drop table nvts_en failed')
 
+    print('############update################')
     #数据更新完落后，更新tag
     upgrate_tag(cu)
     #创建表 nvts_en
@@ -249,8 +250,8 @@ def crt_tbl_blog_blogspost(cu, max_num, flag, all_data_flag):
         exploitability_ease, risk_factor, metasploit_name, d2_elliot_name) select oid , name, tag, cn_ok, ' + \
         'summary, affected, solution, insight, vuldetect, impact, synopsis, description,' + \
         ' exploitability_ease, risk_factor, metasploit_name, d2_elliot_name ' + \
-        'from blog_blogspost where cn_ok = \'0\' and family not in' + \
-        '(\'IT-Grundschutz-11\',\'IT-Grundschutz-10\',\'IT-Grundschutz\',\'IT-Grundschutz-12\',\'IT-Grundschutz-15\', \'IT-Grundschutz-13\')  ORDER BY id ;'
+        'from blog_blogspost where cn_ok = \'0\'' #and family not in' + \
+        #'(\'IT-Grundschutz-11\',\'IT-Grundschutz-10\',\'IT-Grundschutz\',\'IT-Grundschutz-12\',\'IT-Grundschutz-15\', \'IT-Grundschutz-13\')  ORDER BY id ;'
     
     print('##->' + insert_sql)
     cu.execute(insert_sql)
@@ -350,12 +351,13 @@ def fanyi(string):
     translate_result = '转码测试程序'
     return translate_result
 
-def data_process(all_nvts, cur):
+def data_process(all_nvts, cur, conn):
     nvts_tag = ''
     error_oid_list = []
     global gl_Tag_name_cn
     global gl_count_nvts
     nvts_oid = ''
+    google_translate = GoogleTranslate()
     for info_nvts in all_nvts:
         gl_count_nvts = gl_count_nvts + 1
         nvts_id = info_nvts[0]
@@ -378,7 +380,7 @@ def data_process(all_nvts, cur):
         nvts_name_cn = ''
         if '' != nvts_name:
             try:
-                nvts_name_cn = translate_cn(nvts_name).replace('\'', '\'\'').replace('\\n', '\n')
+                nvts_name_cn = google_translate.translate_cn(nvts_name, 'en').replace('\'', '\'\'').replace('\\n', '\n')
             except:
                 print('#->fanyi Name error:oid=' + nvts_oid + ', name=' + nvts_name)
                 continue
@@ -387,7 +389,7 @@ def data_process(all_nvts, cur):
         nvts_summary_cn = ''
         if '' != nvts_summary:
             try:
-                nvts_summary_cn = translate_cn(nvts_summary).replace('\'', '\'\'').replace('\\n', '\n')
+                nvts_summary_cn = google_translate.translate_cn(nvts_summary, 'en').replace('\'', '\'\'').replace('\\n', '\n')
             except:
                 print('#->fanyi summary error:oid=' + nvts_oid + ', summary=' + nvts_summary)
                 continue
@@ -396,7 +398,7 @@ def data_process(all_nvts, cur):
         nvts_affected_cn = ''
         if '' != nvts_affected:
             try:
-                nvts_affected_cn = translate_cn(nvts_affected).replace('\'', '\'\'').replace('\\n', '\n')
+                nvts_affected_cn = google_translate.translate_cn(nvts_affected, 'en').replace('\'', '\'\'').replace('\\n', '\n')
             except:
                 print('#->fanyi affected error:oid=' + nvts_oid + ', affected=' + nvts_affected)
                 continue
@@ -405,7 +407,7 @@ def data_process(all_nvts, cur):
         nvts_solution_cn = ''
         if '' != nvts_solution:
             try:
-                nvts_solution_cn = translate_cn(nvts_solution).replace('\'', '\'\'').replace('\\n', '\n')
+                nvts_solution_cn = google_translate.translate_cn(nvts_solution, 'en').replace('\'', '\'\'').replace('\\n', '\n')
             except:
                 print('#->fanyi solution error:oid=' + nvts_oid + ', solution=' + nvts_solution)
                 continue
@@ -414,7 +416,8 @@ def data_process(all_nvts, cur):
         nvts_insight_cn = ''
         if '' != nvts_insight:
             try:
-                nvts_insight_cn = translate_cn(nvts_insight).replace('\'', '\'\'').replace('\\n', '\n')
+                #text.decode("utf-8").
+                nvts_insight_cn = google_translate.translate_cn(nvts_insight, 'en').replace('\'', '\'\'').replace('\\n', '\n')
             except:
                 print('#->fanyi insight error:oid=' + nvts_oid + ', insight=' + nvts_insight)
                 continue
@@ -424,7 +427,7 @@ def data_process(all_nvts, cur):
         nvts_vuldetect_cn = ''
         if '' != nvts_vuldetect:
             try:
-                nvts_vuldetect_cn = translate_cn(nvts_vuldetect).replace('\'', '\'\'').replace('\\n', '\n')
+                nvts_vuldetect_cn = google_translate.translate_cn(nvts_vuldetect, 'en').replace('\'', '\'\'').replace('\\n', '\n')
             except:
                 print('#->fanyi vuldetect error:oid=' + nvts_oid + ', vuldetect=' + nvts_vuldetect)
                 continue
@@ -433,7 +436,7 @@ def data_process(all_nvts, cur):
         nvts_impact_cn = ''
         if '' != nvts_impact:
             try:
-                nvts_impact_cn = translate_cn(nvts_impact).replace('\'', '\'\'').replace('\\n', '\n')
+                nvts_impact_cn = google_translate.translate_cn(nvts_impact, 'en').replace('\'', '\'\'').replace('\\n', '\n')
             except:
                 print('#->fanyi impact error:oid=' + nvts_oid + ', impact=' + nvts_impact)
                 continue
@@ -442,7 +445,7 @@ def data_process(all_nvts, cur):
         nvts_synopsis_cn = ''
         if '' != nvts_synopsis:
             try:
-                nvts_synopsis_cn = translate_cn(nvts_synopsis).replace('\'', '\'\'').replace('\\n', '\n')
+                nvts_synopsis_cn = google_translate.translate_cn(nvts_synopsis, 'en').replace('\'', '\'\'').replace('\\n', '\n')
             except:
                 print('#->fanyi synopsis error:oid=' + nvts_oid + ', synopsis=' + nvts_synopsis)
                 continue
@@ -451,7 +454,7 @@ def data_process(all_nvts, cur):
         nvts_description_cn = ''
         if '' != nvts_description:
             try:
-                nvts_description_cn = translate_cn(nvts_description).replace('\'', '\'\'').replace('\\n', '\n')
+                nvts_description_cn = google_translate.translate_cn(nvts_description, 'en').replace('\'', '\'\'').replace('\\n', '\n')
             except:
                 print('#->fanyi description error:oid=' + nvts_oid + ', description=' + nvts_description)
                 continue
@@ -460,7 +463,7 @@ def data_process(all_nvts, cur):
         nvts_exploitability_ease_cn = ''
         if '' != nvts_exploitability_ease:
             try:
-                nvts_exploitability_ease_cn = translate_cn(nvts_exploitability_ease).replace('\'', '\'\'').replace('\\n', '\n')
+                nvts_exploitability_ease_cn = google_translate.translate_cn(nvts_exploitability_ease, 'en').replace('\'', '\'\'').replace('\\n', '\n')
             except:
                 print('#->fanyi exploitability_ease error:oid=' + nvts_oid + ', exploitability_ease=' + nvts_exploitability_ease)
                 continue
@@ -469,7 +472,7 @@ def data_process(all_nvts, cur):
         nvts_risk_factor_cn = ''
         if '' != nvts_risk_factor:
             try:
-                nvts_risk_factor_cn = translate_cn(nvts_risk_factor).replace('\'', '\'\'').replace('\\n', '\n')
+                nvts_risk_factor_cn = google_translate.translate_cn(nvts_risk_factor, 'en').replace('\'', '\'\'').replace('\\n', '\n')
             except:
                 print('#->fanyi risk_factor error:oid=' + nvts_oid + ', risk_factor=' + nvts_risk_factor)
                 continue
@@ -478,7 +481,7 @@ def data_process(all_nvts, cur):
         nvts_metasploit_name_cn = ''
         if '' != nvts_metasploit_name:
             try:
-                nvts_metasploit_name_cn = translate_cn(nvts_metasploit_name).replace('\'', '\'\'').replace('\\n', '\n')
+                nvts_metasploit_name_cn = google_translate.translate_cn(nvts_metasploit_name, 'en').replace('\'', '\'\'').replace('\\n', '\n')
             except:
                 print('#->fanyi metasploit_name error:oid=' + nvts_oid + ', metasploit_name=' + nvts_metasploit_name)
                 continue
@@ -487,7 +490,7 @@ def data_process(all_nvts, cur):
         nvts_d2_elliot_name_cn = ''
         if '' != nvts_d2_elliot_name:
             try:
-                nvts_d2_elliot_name_cn = translate_cn(nvts_d2_elliot_name).replace('\'', '\'\'').replace('\\n', '\n')
+                nvts_d2_elliot_name_cn = google_translate.translate_cn(nvts_d2_elliot_name, 'de').replace('\'', '\'\'').replace('\\n', '\n')
             except:
                 print('#->fanyi d2_elliot_name error:oid=' + nvts_oid + ', d2_elliot_name=' + nvts_d2_elliot_name)
                 continue
@@ -513,99 +516,10 @@ def data_process(all_nvts, cur):
         try:
             print("##->progress=" + str(gl_count_nvts))
             cur.execute(update_sql)
+            conn.commit()
         except:
             print('#ERROR#->update sql error:' + update_sql)
             continue
-
-
-# Example: find_last('aaaa', 'a') returns 3
-# Make sure your procedure has a return statement.
-def find_last(string,str):
-    last_position=-1
-    while True:
-        position=string.find(str,last_position+1)
-        if position==-1:
-            return last_position
-        last_position=position
-
-def open_url(url):    
-    headers = {'User-Agent':'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:23.0) Gecko/20100101 Firefox/23.0'}      
-    req = urllib2.Request(url = url,headers=headers)    
-    response = urllib2.urlopen(req)    
-    data = response.read().decode('utf-8')    
-    return data    
-
-def translate_core(content,tk):    
-    if len(content) > 4891:    
-        print("#ERROR#too long byte >4891")
-        return
-
-    content = urllib2.quote(content)
-
-    url = "http://translate.google.cn/translate_a/single?client=t"+ "&sl=en&tl=zh-CN&hl=zh-CN&dt=at&dt=bd&dt=ex&dt=ld&dt=md&dt=qca"+"&dt=rw&dt=rm&dt=ss&dt=t&ie=UTF-8&oe=UTF-8&clearbtn=1&otf=1&pc=1"+"&srcrom=0&ssel=0&tsel=0&kc=2&tk=%s&q=%s"%(tk,content)    
-
-    #result为json格式
-    result = open_url(url)    
-    #print('results:' + result)
-
-    if len(content) < 10:
-        end = result.find("\",")  
-        if end > 4:
-            return result[4:end]
-    else:
-        result_all = ''
-        result_all = result.split(',null,"en",null,null,')[0].replace('[[', '').replace(']]', ']')[1:]
-        #print('result_all:' + result_all)
-
-        output_cn = ''
-        #解析中文字段并拼接
-        list = result_all.split('],[')
-        for i in range(len(list)-1):
-            end = list[i].find("\",")
-            tmp_buf = list[i][1:end]
-            output_cn = output_cn + tmp_buf
-        return output_cn
-
-def translate_normal(content):    
-    js = Py4Js()    
-
-    tk = js.getTk(content)
-    #print('english:' + content)
-    cn_buf = translate_core(content,tk)
-    #print('Chinese:' + cn_buf)
-    return cn_buf
-
-def translate_cn(content):
-    LEN_LIMIT = 4891
-    all_len = len(content)
-    #print('en:' + content)
-    if all_len > LEN_LIMIT:
-        content_cn = ''
-        while True:
-            content_limit = content[0:LEN_LIMIT]
-            limit_end = find_last(content_limit, '.') + 1
-            #print('limit_end:' + str(limit_end))
-            if limit_end == 0:
-                limit_end = find_last(content_limit, ' ') + 1
-                if limit_end == 0:
-                    limit_end = LEN_LIMIT
-            content_en = content[0:limit_end]
-            leave_len = all_len - limit_end
-            if content_en == '':
-                break;
-            #print('content_en:' + content_en)
-            content_cn = content_cn + translate_normal(content_en);
-            content = content[limit_end:]
- 
-        return content_cn
-    else:
-        return translate_normal(content)
-
-#google api, per 1000 words everyday
-def translate_cn_api(content):
-    translator= Translator(to_lang="zh")
-    translation = translator.translate(content)
-    return translation
 
 if __name__ == "__main__":
     gl_Tag_name_cn = []
@@ -628,7 +542,7 @@ if __name__ == "__main__":
 
     #  copy data
     db_path = sys.argv[2]
-    THTREA_LEN = sys.argv[3]
+    THTREA_LEN = int(sys.argv[3])
     cx = sqlite3.connect(db_path)
     cu = cx.cursor()
 
@@ -673,8 +587,8 @@ if __name__ == "__main__":
         try:
             count_num = count_num + 1
             threadName = 'Thread-' + str(count_num)
-            min = 300 * (count_num -1)
-            max = 300 * count_num
+            min = THTREA_LEN * (count_num -1)
+            max = THTREA_LEN * count_num
             if min > count_nvts_number:
                 break
             if max >= count_nvts_number:
@@ -687,4 +601,3 @@ if __name__ == "__main__":
                 break
         except:
             print("Error: unable to start thread")
-    
