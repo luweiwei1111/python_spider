@@ -44,24 +44,27 @@ def nomal_data_proc(threadName, conn, min, max):
 def upgrate_tag(cu):
     #更新tag数据
     select_sql = 'select  oid, tag from blog_blogspost where cn_ok =\'0\';'
-    summary_cn = ''
-    affected_cn = ''
-    solution_cn = ''
-    insight_cn = ''
-    vuldetect_cn = ''
-    impact_cn = ''
-    synopsis_cn = ''
-    description_cn = ''
-    exploitability_ease_cn = ''
-    risk_factor_cn = ''
-    metasploit_name_cn = ''
-    d2_elliot_name_cn = ''
+    
     count_set = 0
     cu.execute(select_sql)
     result_tag = cu.fetchall()
     for info in result_tag:
         oid = info[0]
         tag = info[1]
+        summary_cn = ''
+        affected_cn = ''
+        solution_cn = ''
+        insight_cn = ''
+        vuldetect_cn = ''
+        impact_cn = ''
+        synopsis_cn = ''
+        description_cn = ''
+        exploitability_ease_cn = ''
+        risk_factor_cn = ''
+        metasploit_name_cn = ''
+        d2_elliot_name_cn = ''
+
+        #print("#tag->%s" %(info))
         if tag != 'NOTAG':
             tag_list = tag.split('|')
             for tag_info in tag_list:
@@ -162,7 +165,8 @@ def crt_tbl_blog_blogspost(cu, max_num, flag, all_data_flag):
            metasploit_name_cn      TEXT, \
            d2_elliot_name          TEXT, \
            d2_elliot_name_cn       TEXT, \
-           family                  TEXT);'
+           family                  TEXT, \
+           family_cn               TEXT);'
         print('##->1.Create Table blog_blogspost Success')
         cu.execute(ctl_nvts_cn)
         #索引
