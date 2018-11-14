@@ -61,12 +61,10 @@ COOKIES_ENABLED = False
 #DOWNLOADER_MIDDLEWARES = {
 #    'cnnvd.middlewares.CnnvdDownloaderMiddleware': 543,
 #}
+
 DOWNLOADER_MIDDLEWARES = {
-   #'qianmu.middlewares.MyCustomDownloaderMiddleware': 543,
-    #'scrapy.contrib.downloadermiddleware.httpproxy.HttpProxyMiddleware':123,
     'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware':123,
     'cnnvd.middlewares.IPPOOLS':125,
-    #'cnnvd.uamid.Uamid':1
 }
 
 # Enable or disable extensions

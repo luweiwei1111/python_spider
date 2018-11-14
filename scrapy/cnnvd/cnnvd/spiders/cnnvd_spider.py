@@ -53,7 +53,7 @@ class Myspider(scrapy.Spider):
         print('#1.cve编号:')
         cve_list = BeautifulSoup(response.text, 'lxml').find_all('a', href=re.compile("cve.mitre.org"))
         if len(cve_list) != 0:
-            cve = cve_list[0].text.replace('\n', '').replace(' ', '').replace('\t', '')
+            cve = cve_list[0].text.replace('\n', '').replace(' ', '').replace('\t', '').replace('\r', '')
         else:
             cve = 'null'
             print('#ERROR#cve null')
@@ -93,6 +93,7 @@ class Myspider(scrapy.Spider):
 
 
         ######4.cnnvd#############################################
+        """
         print('4.CNNVD编号：')
         print(self.cnnvd)
         item['cnnvd'] = self.cnnvd
@@ -110,7 +111,7 @@ class Myspider(scrapy.Spider):
         else:
             print('#ERROR#cnnvd null')
             return
-        """
+        
 
         ######5.publish_date#############################################
         print('5.发布日期：')

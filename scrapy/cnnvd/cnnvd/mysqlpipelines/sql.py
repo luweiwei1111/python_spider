@@ -143,7 +143,7 @@ class Sql:
     def select_url_list(cls):
         #select t1.cnnvd_url from cnnvd_url t1 where not exists (select * from cve_cnnvd_cn t2 where t1.cnnvd = t2.cnnvd)
         #sql = 'select t1.url from cnnvd_url t1 where not exists (select * from cve_cnnvd_cn t2 where t1.cnnvd = t2.cnnvd);'
-        #sql = 'select url from cnnvd_url order by url LIMIT 200;'
+        #sql = 'select url from cnnvd_url order by url LIMIT 20;'
         sql = 'select url from cnnvd_url;'
         #  CNNVD-201106-070  CNNVD-201810-569  CNNVD-199907-024 CNNVD-201810-652
         #sql = 'select url from cnnvd_url where cnnvd = \'CNNVD-199603-001\';'
