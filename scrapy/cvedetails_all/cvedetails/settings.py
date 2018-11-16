@@ -114,37 +114,126 @@ TYPE_DICT_CN = {
             'of exploits': 'e漏洞利用量'
             }
 
+TYPE_DICT_EN = {
+            'opdos': '1opdos',
+            'opec': '2opec',
+            'opov': '3opov',
+            'opmemc': '4opmemc',
+            'opsqli': '5opsqli',
+            'opxss': '6opxss',
+            'opdirt': '7opdirt',
+            'ophttprs': '8ophttprs',
+            'opbyp': '9opbyp',
+            'opginf': 'aopginf',
+            'opgpriv': 'bopgpriv',
+            'opcsrf': 'copcsrf',
+            'opfileinc': 'dopfileinc',
+            'of exploits': 'eof exploits'
+            }
+
 TYPE_LIST =[
             'dos',
-	        'Code Execution',
-	        'Overflow',
-	        'Memory Corruption',
-	        'Sql Injection',
-	        'XSS',
-	        'Directory Traversal',
-	        'Http Response Splitting',
-	        'Bypass something',
-	        'Gain Information',
-	        'Gain Privileges',
-	        'CSRF',
-	        'File Inclusion',
-	        'of exploits',
+            'Code Execution',
+            'Overflow',
+            'Memory Corruption',
+            'Sql Injection',
+            'XSS',
+            'Directory Traversal',
+            'Http Response Splitting',
+            'Bypass something',
+            'Gain Information',
+            'Gain Privileges',
+            'CSRF',
+            'File Inclusion',
+            'of exploits',
             ]
     
 #漏洞类型列表
 TYPE_DICT = {
-	        'dos': 'Denial of service vulnerabilities for',                                   #1.拒绝服务
-	        'Code Execution': 'Code execution vulnerabilities for',                           #2.代码执行
-	        'Overflow': 'Overflow vulnerabilities for',                                       #3.溢出
-	        'Memory Corruption': 'Memory corruption vulnerabilities for',                     #4.内存崩溃
-	        'Sql Injection': 'Sql injection vulnerabilities for',                             #sql注入
-	        'XSS': 'Cross site scripting vulnerabilities for',                                #5.跨站脚本攻击
-	        'Directory Traversal': 'Directory traversal vulnerabilities for',                 #6.目录遍历
-	        'Http Response Splitting': 'Http response splitting vulnerabilities for',         #http拆分攻击
-	        'Bypass something': 'By pass a restriction or similar type vulnerabilities for',  #7.绕过
-	        'Gain Information': 'Information gain, leak vulnerabilities for',                 #8.信息收集
-	        'Gain Privileges': 'Privilege gain, elevation vulnerabilities for',               #9,权限获取
-	        'CSRF': 'Cross site request forgery, CSRF, vulnerabilities for',                  #10.跨站请求伪造
-	        'File Inclusion': 'File inclusion vulnerabilities for',                           #文件包含
-	        'of exploits': 'Total number of public exploits'                                  #11.漏洞利用量
-	        }
+            'dos': 'Denial of service vulnerabilities for',                                   #1.拒绝服务
+            'Code Execution': 'Code execution vulnerabilities for',                           #2.代码执行
+            'Overflow': 'Overflow vulnerabilities for',                                       #3.溢出
+            'Memory Corruption': 'Memory corruption vulnerabilities for',                     #4.内存崩溃
+            'Sql Injection': 'Sql injection vulnerabilities for',                             #sql注入
+            'XSS': 'Cross site scripting vulnerabilities for',                                #5.跨站脚本攻击
+            'Directory Traversal': 'Directory traversal vulnerabilities for',                 #6.目录遍历
+            'Http Response Splitting': 'Http response splitting vulnerabilities for',         #http拆分攻击
+            'Bypass something': 'By pass a restriction or similar type vulnerabilities for',  #7.绕过
+            'Gain Information': 'Information gain, leak vulnerabilities for',                 #8.信息收集
+            'Gain Privileges': 'Privilege gain, elevation vulnerabilities for',               #9,权限获取
+            'CSRF': 'Cross site request forgery, CSRF, vulnerabilities for',                  #10.跨站请求伪造
+            'File Inclusion': 'File inclusion vulnerabilities for',                           #文件包含
+            'of exploits': 'Total number of public exploits'                                  #11.漏洞利用量
+            }
+
+
+
+WIN_LIST = {
+            '11366',		#windows server 2008
+            '17153',		#windows 7
+            '9591',			#windows vista
+            '23546',		#windows server 2012
+            '739',			#windows xp
+            '26434',		#windows 8.1
+            '32238',		#windows 10
+            '26435',		#windows Rt8.1
+            '107',			#windows 2000
+            '34965',		#windows server 2016
+            '2594',			#woindows 2003 server
+           }
+
+
+(18131)
+
+LINUX_LIST = {
+        #########SUSE
+            '92',		    #Suse Linux
+            '18579',		#Linux Enterprise Server
+            '9575',	        #Linux Enterprise Desktop
+            '34242',		#Linux Enterprise
+            '33566',        #Linux Enterprise Software Development Kit
+            '11168',        #Opensuse
+        #########MAC OS X
+            '9325',         #MAC OS X
+        #########FreeBAS
+            '7',            #FreeBSD
+        #########Debian
+            '1251',         #Debian
+        #########RedHat
+            '79',           #Enterprise Linux Desktop
+            '78',           #Enterprise Linux
+            '24639',        #Enterprise Linux Server
+            '24640',        #Enterprise Linux Workstation
+            '25167',        #Enterprise Linux Server Eus
+            '38',           #Linux
+            '25627',        #Openstack
+        ########OpenSuse
+            '14195',        #OpenSuse
+            '40865',        #Leap
+            '33567',        #Evergreen
+        ########Ubuntu
+            '20550',        #Canonical Ubuntu Linux
+            '80',           #Ubuntu Ubuntu Linux
+        ########CentOS
+            '18131',        #CentOS
+           }
+
+DB_LIST = {
+            '3671',		    #Oracle 10g
+            '404',		    #Oracle 8i
+            '1427',			#Oracle 9i
+            '14516',		#Oracle Database
+            '3424',			#DB2
+            '251',		    #Sql Server
+            '316',		    #Mysql
+            '21801',		#MySQL
+           }
+
+PRODUCT_DICT = {
+            'os_win': WIN_LIST,            #windows操作系统(左世涛)
+            'os_linux': LINUX_LIST,        #linux操作系统(裴杰)
+            #'bigdata': BIGDATA_LIST,       #大数据组件(唐逸群)
+            #'apps': APPS_LIST,             #应用中间件(卢伟伟)
+            'db': DB_LIST,                 #数据库(裴杰)
+            #'devices': DEVICES_LIST        #网络设备(廖成杰)
+            }

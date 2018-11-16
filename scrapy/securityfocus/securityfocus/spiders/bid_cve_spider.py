@@ -45,8 +45,13 @@ class Myspider(scrapy.Spider):
         print('##############################################')
         for item in bid_url_list:
             url = item.text
-            print(url)
-            yield Request(url, self.get_bid_cve_details)
+            bid = url.split('/')[-1]
+            ret = Sql.select_bid_cve_by_bid(bid)
+            if ret[0] == 1:
+                continue
+            else:
+                print(url)
+                yield Request(url, self.get_bid_cve_details)
 
     def get_bid_cve_details(self, response):
         item = SecurityfocusItem()

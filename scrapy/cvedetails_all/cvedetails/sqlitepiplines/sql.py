@@ -46,6 +46,22 @@ class Sql:
         cnx.commit()
 
     @classmethod
+    def clr_cve_details(cls):
+        clr_sql = 'delete from cve_details;'
+
+        print(clr_sql)
+        cur.execute(clr_sql)
+        cnx.commit()
+
+    @classmethod
+    def clr_cve_detail_list(cls):
+        clr_sql = 'delete from cve_detail_list;'
+
+        print(clr_sql)
+        cur.execute(clr_sql)
+        cnx.commit()
+
+    @classmethod
     def insert_cve_details(cls, product_id, product_name, year, vul_type, cve):
         sql = ''
         sql = 'INSERT INTO cve_details(product_id, product_name, year, vul_type, cve) VALUES( \'%s\', \'%s\', \'%s\', \'%s\', \'%s\');' % (product_id, product_name, year, vul_type, cve)

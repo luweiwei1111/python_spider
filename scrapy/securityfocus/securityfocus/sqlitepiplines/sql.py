@@ -31,5 +31,19 @@ class Sql:
         cnx.commit()
 
     @classmethod
+    def select_ip_port_random(cls):
+        sql = 'SELECT ip_port from ip_port_pool ORDER BY RANDOM () LIMIT 1;'
+        #print(sql)
+        cur.execute(sql)
+        return cur.fetchall()[0]
+
+    @classmethod
+    def select_bid_cve_by_bid(cls, bid):
+        sql = 'SELECT EXISTS(SELECT 1 FROM bid_cve WHERE bid= \'' + bid + '\');'
+        print(sql)
+        cur.execute(sql)
+        return cur.fetchall()[0]
+
+    @classmethod
     def sqliteEscape(cls, keyWord):
         return keyWord.replace("/", "//").replace("'", "''").replace("[", "/[").replace("]", "/]").replace("%", "/%").replace("&","/&").replace("_", "/_").replace("(", "/(").replace(")", "/)")

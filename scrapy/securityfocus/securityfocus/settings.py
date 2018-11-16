@@ -53,9 +53,11 @@ ROBOTSTXT_OBEY = True
 
 # Enable or disable downloader middlewares
 # See http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
-#DOWNLOADER_MIDDLEWARES = {
-#    'securityfocus.middlewares.MyCustomDownloaderMiddleware': 543,
-#}
+DOWNLOADER_MIDDLEWARES = {
+    #'securityfocus.middlewares.MyCustomDownloaderMiddleware': 543,
+    'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware':123,
+    'securityfocus.middlewares.IPPOOLS':125,
+}
 
 # Enable or disable extensions
 # See http://scrapy.readthedocs.org/en/latest/topics/extensions.html
@@ -93,3 +95,25 @@ ITEM_PIPELINES = {
 
 #for sqlite3 DB
 SQLITE3_DB = 'bid_cve.db'
+
+# 设置IP池
+IPPOOL = [
+    #{"ipaddr":"47.105.144.119:80"},
+    #{"ipaddr":"47.95.50.158:80"},
+    #{"ipaddr":"47.94.230.42:9999"},
+    #{"ipaddr":"47.106.122.223:8888"},
+    #50|120.78.215.151:808
+    {"ipaddr":"221.2.174.28:8060"},
+    {"ipaddr":"39.137.140.13:8080"},
+    {"ipaddr":"121.46.95.27:8080"},
+    {"ipaddr":"58.240.53.194:8080"},
+    {"ipaddr":"39.137.141.142:8080"}
+    #{"ipaddr":"175.9.160.154:8060"},
+    #{"ipaddr":"39.135.9.231:8080"},
+    #{"ipaddr":"47.105.146.225:80"},
+]
+
+"""
+http://ip.zdaye.com/dayProxy/ip/133009.html
+站大爷
+"""
