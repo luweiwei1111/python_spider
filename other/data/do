@@ -1,0 +1,77 @@
+#!/bin/bash
+wincsv=wintype.csv
+
+>$wincsv
+#WinType=( "Windows Server 2008" )
+
+WinType=( "Windows Server 2008"
+	"Windows 7" \
+	"Windows Vista" \
+	"Windows Server 2012" \
+	"Windows Xp" \
+	"Windows 8.1" \
+	"Windows 10" \
+	"Windows Rt 8.1" \
+	"Windows 2000" \
+	"Windows Server 2016" \
+	"Windows 2003 Server" )	
+
+sqlite3 cvedetails.db "drop table vas_nessus_list;" 
+sqlite3 cvedetails.db "
+	CREATE TABLE vas_nessus_list (
+	wintype,
+	year,
+	vul_type,
+	cve_num,
+	openvas_have,
+	openvas_filename,
+	nessus_have,
+	nessus_file_name	
+	);"
+
+for ((i = 0; i < ${#WinType[@]}; i++)); 
+do 
+#	echo "${WinType[$i]}"; 
+	
+	>cve.txt
+
+	sqlite3 cvedetails.db "SELECT name,
+		year,
+		vul_type,
+		cve
+	FROM cve_detail_list
+	WHERE name = '${WinType[$i]}' and vul_type != 'e漏洞利用量'
+	ORDER BY year,vul_type "  >cve.txt
+
+	cat cve.txt | while read line
+	do
+		a1=`echo $line|awk  -F '|'  '{print $1}'` 
+		a2=`echo $line|awk  -F '|'  '{print $2}'` 
+		a3=`echo $line|awk  -F '|'  '{print $3}'` 
+		b=`echo $line|awk  -F '|'  '{print $4}'`
+		
+		sql="select file from nvts where cve like"
+		echo "Checking ${WinType[$i]} $b..."
+		c=`sqlite3 nvt.db "$sql '%$b%' and file not like 'ns_%'"`  
+		d=".nasl"
+
+		e=`sqlite3 ns.db "$sql '%$b%'"`
+
+		f=$(echo $e | grep "${d}")
+		if [ "$f" != "" ]
+		then
+			g="Yes"
+		else
+			g="No"
+		fi
+		result=$(echo $c | grep "${d}")
+		if [ "$result" != "" ]
+		then
+			echo  $a1,$a2,	$a3	,$b, "Yes", $c >>$wincsv
+			sqlite3 cvedetails.db "INSERT INTO vas_nessus_list VALUES (\"$a1\",\"$a2\",\"$a3\",\"$b\",\"Yes\",\"$c\",\"$g\",\"$e\")"
+		else
+			echo  $a1,$a2,	$a3	,$b, "No", $c >>$wincsv
+			sqlite3 cvedetails.db "INSERT INTO vas_nessus_list VALUES (\"$a1\",\"$a2\",\"$a3\",\"$b\",\"No\",\"$c\",\"$g\",\"$e\")"
+		fi
+	done
+done
