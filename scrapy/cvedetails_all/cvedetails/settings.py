@@ -183,8 +183,6 @@ WIN_LIST = {
            }
 
 
-(18131)
-
 LINUX_LIST = {
         #########SUSE
             '92',		    #Suse Linux
@@ -229,11 +227,57 @@ DB_LIST = {
             '21801',		#MySQL
            }
 
+Virtualization_LIST = {
+        #########Hadoop
+            '22215',         #Apache-Hadoop
+            '22217',         #Cloudera-Hadoop
+        #########Zookeeper
+            '27453',         #Apache-Zookeeper
+        #########Esxi
+            '14180',         #Vmware-Esxi-App
+            '22134',         #Vmware-Esxi-Os
+        #########Xen
+            '12196',         #Xensource-Inc-XEN
+            '12750',         #XEN-XEN-App
+            '14092',         #Xensource-XEN
+            '15065',         #Citrix-XEN
+            '23463',         #XEN-XEN-Os 
+        #########Xenserver
+            '14577',         #Citrix-Xenserver-App 
+            '48142',         #Citrix-Xenserver-Os
+        ########Vmware
+            '6560',          #Vmware-ACE
+            '14181',         #Vmware-ESX-App 
+            '22176',         #Vmware-ESX-Os 
+            '14147',         #Vmware-Fusion
+            '35455',         #Vmware-Horizon
+            '6561',          #Vmware-Player
+            '7928',          #Vmware-Server
+            '28398',         #Vmware-Tools
+            '20517',         #Vmware-Vcenter-Server 
+            '23748',         #Vmware-Vcenter-Server-Appliance
+            '22135',         #Vmware-View
+            '9264',          #Vmware-Virtualcenter
+            '12342',         #Vmware-Vmware-Player
+            '12343',         #Vmware-Vmware-Server
+            '12155',         #Vmware-Vmware-Workstation 
+            '33501',         #Vmware-Vrealize-Automation
+            '436',           #Vmware-Workstation
+            '34392',         #Vmware-Workstation-Player
+            '34391',         #Vmware-Workstation-Pro
+           }
+
+Vendor_LIST = {
+            '315',           #F5
+            '16',            #Cisco
+            }
+
 PRODUCT_DICT = {
-            'os_win': WIN_LIST,            #windows操作系统(左世涛)
-            'os_linux': LINUX_LIST,        #linux操作系统(裴杰)
-            #'bigdata': BIGDATA_LIST,       #大数据组件(唐逸群)
-            #'apps': APPS_LIST,             #应用中间件(卢伟伟)
-            'db': DB_LIST,                 #数据库(裴杰)
-            #'devices': DEVICES_LIST        #网络设备(廖成杰)
+            #'product-os_win': WIN_LIST,            #windows操作系统(左世涛)
+            #'product-os_linux': LINUX_LIST,        #linux操作系统(裴杰)
+            'product-bigdata': Virtualization_LIST,       #大数据组件(唐逸群)
+            #'product-apps': APPS_LIST,             #应用中间件(卢伟伟)
+            #'product-db': DB_LIST,                 #数据库(裴杰)
+            #'product-devices': DEVICES_LIST        #网络设备(廖成杰)
+            'vendor-device': Vendor_LIST            #Cisco
             }

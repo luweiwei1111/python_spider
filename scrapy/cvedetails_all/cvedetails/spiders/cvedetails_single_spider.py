@@ -31,8 +31,14 @@ class Myspider(scrapy.Spider):
             product_list = settings.PRODUCT_DICT[key]
             print('KEY=' + key)
             for product_id in product_list:
-                product_url = self.base_url + '/product/' + product_id
-                print('#####product_url:' + product_url)
+                if 'product' in key:
+                    product_url = self.base_url + '/product/' + product_id
+                elif 'vendor' in key:
+                    product_url = self.base_url + '/vendor/' + product_id
+                else:
+                    print('#ERROR# key type failed:' + key)
+                    return
+                print('#####url:' + product_url)
                 yield Request(product_url, self.get_product_url)
 
     def get_product_url(self, response):
@@ -83,6 +89,10 @@ class Myspider(scrapy.Spider):
         product_list = soup.find_all('a', 
                 href=re.compile("//www.cvedetails.com/product"))
         
+        if len(product_list) == 0:
+            product_list = soup.find_all('a', 
+                href=re.compile("//www.cvedetails.com/vendor"))
+
         product_name = Sql.sqliteEscape(product_list[0].text)
         item['product_name'] = product_name
         print('2.操作系统：' + item['product_name'])
