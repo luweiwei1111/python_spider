@@ -1,36 +1,10 @@
 # coding=utf-8
 import sqlite3
 
-cnx = sqlite3.connect('plugins_all.db')
+cnx = sqlite3.connect('topvas_nvts.db')
 cur = cnx.cursor()
 
 class Sql:
-    @classmethod
-    def ctl_tb_ness_info(cls):
-        crt_tb_sql = 'CREATE TABLE if not exists ness_info( \
-            id                  INTEGER, \
-            file_name           TEXT NOT NULL, \
-            line_desc           TEXT, \
-            line_all            TEXT, \
-            PRIMARY KEY (id,file_name) )'
-
-        #print(crt_tb_sql)
-        cur.execute(crt_tb_sql)
-        cnx.commit()
-
-    @classmethod
-    def insert_ness_info(cls, id, file_name, line_desc, line_all):
-        sql = ''
-        sql = 'INSERT INTO ness_info VALUES( \'%s\', \'%s\', \'%s\', \'%s\');' % (id, file_name, line_desc, line_all)
-
-        #print('+++++++开始保存数据+++++++')
-        #print(sql)
-        try:
-            cur.execute(sql)
-        except:
-            print('#ERROR#insert ness_info sql error:' + sql)
-        cnx.commit()
-
     @classmethod
     def sql_execute(cls, sql):
         print(sql)
@@ -38,8 +12,12 @@ class Sql:
         return cur.fetchall()
 
     @classmethod
-    def select_ness_info_line(cls):
-        sql = 'SELECT file_name, line_desc, line_all from ness_info;'
+    def sqliteEscape(cls, keyWord):
+        return keyWord.replace("/", "//").replace("'", "''").replace("[", "/[").replace("]", "/]").replace("%", "/%").replace("&","/&").replace("_", "/_").replace("(", "/(").replace(")", "/)")
+
+    @classmethod
+    def select_nvts_ness_by_id(cls, nvt_id):
+        sql = 'SELECT file from nvts_ness where oid = \'%s\'' % (nvt_id)
         print(sql)
         try:
             cur.execute(sql)
@@ -48,27 +26,92 @@ class Sql:
         return cur.fetchall()
 
     @classmethod
-    def ctl_tb_topvas_oid_info(cls):
-        crt_tb_sql = 'CREATE TABLE if not exists topvas_oid_info( \
-            oid           TEXT NOT NULL, \
-            file_name     TEXT NOT NULL);'
-
-        #print(crt_tb_sql)
-        cur.execute(crt_tb_sql)
-        cnx.commit()
-
-    @classmethod
-    def insert_topvas_oid_info(cls, oid, file_name):
-        sql = ''
-        sql = 'INSERT INTO topvas_oid_info VALUES( \'%s\', \'%s\');' % (oid, file_name)
-        #print('+++++++开始保存数据+++++++')
+    def select_nvts_topvas_by_id(cls, nvt_id):
+        sql = 'SELECT file from nvts where oid = \'%s\'' % (nvt_id)
         print(sql)
         try:
             cur.execute(sql)
         except:
-            print('#ERROR#insert topvas_oid_info sql error:' + sql)
+            print('#ERROR#select sql error:' + sql)
+        return cur.fetchall()
+
+    @classmethod
+    def select_cve_detail_list(cls):
+        # sql = 'SELECT product_id, product_name, year, vul_type, cve from cve_detail_list limit 5;'
+        sql = 'SELECT product_id, product_name, year, vul_type, cve from cve_detail_list;'
+        print(sql)
+        try:
+            cur.execute(sql)
+        except:
+            print('#ERROR#select sql error:' + sql)
+        return cur.fetchall()
+
+    @classmethod
+    def select_nvt_cves_by_cve(cls, cve_name):
+        sql = 'SELECT oid from nvt_cves where cve_name = \'%s\'' % (cve_name)
+
+        print(sql)
+        try:
+            cur.execute(sql)
+        except:
+            print('#ERROR#select sql error:' + sql)
+        return cur.fetchall()
+
+    @classmethod
+    def select_nvt_ness_cves_by_cve(cls, cve_name):
+        sql = 'SELECT oid from nvt_ness_cves where cve_name = \'%s\'' % (cve_name)
+
+        print(sql)
+        try:
+            cur.execute(sql)
+        except:
+            print('#ERROR#select sql error:' + sql)
+        return cur.fetchall()
+
+    @classmethod
+    def ctl_tb_cve_report(cls):
+        crt_tb_sql = 'CREATE TABLE if not exists cve_report( \
+            product_id          TEXT NOT NULL, \
+            product_name        TEXT NOT NULL, \
+            year                TEXT NOT NULL, \
+            vul_type            TEXT NOT NULL, \
+            cve                 TEXT NOT NULL, \
+            topvas_file         TEXT, \
+            topvas_exist        TEXT, \
+            nessus_file         TEXT, \
+            nessus_exist        TEXT, \
+            PRIMARY KEY (product_name,year, vul_type,cve) )'
+
+        print(crt_tb_sql)
+        cur.execute(crt_tb_sql)
         cnx.commit()
 
     @classmethod
-    def sqliteEscape(cls, keyWord):
-        return keyWord.replace("/", "//").replace("'", "''").replace("[", "/[").replace("]", "/]").replace("%", "/%").replace("&","/&").replace("_", "/_").replace("(", "/(").replace(")", "/)")
+    def cls_tb_cve_report(cls):
+        sql = 'delete from cve_report;'
+
+        print(sql)
+        cur.execute(sql)
+        cnx.commit()
+
+    @classmethod
+    def drop_tb_cve_report(cls):
+        sql = 'drop table if exists cve_report;'
+
+        print(sql)
+        cur.execute(sql)
+        cnx.commit()
+
+    @classmethod
+    def insert_cve_report(cls, product_id, product_name, year, vul_type, cve, topvas_file, topvas_exist, nessus_file, nessus_exist):
+        sql = ''
+        sql = 'INSERT INTO cve_report VALUES( \'%s\', \'%s\', \'%s\', \'%s\', \'%s\', \'%s\', \'%s\', \'%s\', \'%s\');' % (product_id, product_name, year, vul_type, cve, topvas_file, topvas_exist, nessus_file, nessus_exist)
+
+        print('+++++++开始保存数据+++++++')
+        print(sql)
+        try:
+            cur.execute(sql)
+        except:
+            print('#ERROR#insert cve_report sql error:' + sql)
+        cnx.commit()
+    
