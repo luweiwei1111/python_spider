@@ -14,6 +14,7 @@ class TopVAS:
         #Sql.drop_tb_cve_report()
         Sql.ctl_tb_cve_report()
         Sql.cls_tb_cve_report()
+        Sql.ctl_index_nvts_ness()
 
     def cve_report(self):
         #cve topvas

@@ -103,6 +103,26 @@ class Sql:
         cnx.commit()
 
     @classmethod
+    def ctl_index_nvts_ness(cls):
+        index_list = {
+            'CREATE INDEX nvts_ness_by_creation_time ON nvts_ness (creation_time);',
+            'CREATE INDEX nvts_ness_by_cvss_base ON nvts_ness (cvss_base);',
+            'CREATE INDEX nvts_ness_by_family ON nvts_ness (family);',
+            'CREATE INDEX nvts_ness_by_modification_time ON nvts_ness (modification_time);'
+            'CREATE INDEX nvts_ness_by_name ON nvts_ness (name);',
+            'CREATE INDEX nvts_ness_by_oid ON nvts_ness (oid);',
+            'CREATE INDEX nvts_ness_by_solution_type ON nvts_ness (solution_type);',
+            }
+        for sql in index_list:
+            print(sql)
+            try:
+                cur.execute(sql)
+            except:
+                print('#ERROR#create index sql error:' + sql)
+        cnx.commit()
+
+
+    @classmethod
     def insert_cve_report(cls, product_id, product_name, year, vul_type, cve, topvas_file, topvas_exist, nessus_file, nessus_exist):
         sql = ''
         sql = 'INSERT INTO cve_report VALUES( \'%s\', \'%s\', \'%s\', \'%s\', \'%s\', \'%s\', \'%s\', \'%s\', \'%s\');' % (product_id, product_name, year, vul_type, cve, topvas_file, topvas_exist, nessus_file, nessus_exist)
