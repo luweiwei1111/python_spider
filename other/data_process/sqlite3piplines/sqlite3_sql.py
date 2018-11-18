@@ -16,8 +16,8 @@ class Sql:
         return keyWord.replace("/", "//").replace("'", "''").replace("[", "/[").replace("]", "/]").replace("%", "/%").replace("&","/&").replace("_", "/_").replace("(", "/(").replace(")", "/)")
 
     @classmethod
-    def select_nvts_ness_by_id(cls, nvt_id):
-        sql = 'SELECT file from nvts_ness where oid = \'%s\'' % (nvt_id)
+    def select_nvts_ness_by_cve(cls, cve):
+        sql = 'SELECT file from nvts_ness where cve like \'%%%s%%\'' % (cve)
         print(sql)
         try:
             cur.execute(sql)
@@ -26,8 +26,8 @@ class Sql:
         return cur.fetchall()
 
     @classmethod
-    def select_nvts_topvas_by_id(cls, nvt_id):
-        sql = 'SELECT file from nvts where oid = \'%s\'' % (nvt_id)
+    def select_nvts_topvas_by_cve(cls, cve):
+        sql = 'SELECT file from nvts where cve like \'%%%s%%\'' % (cve)
         print(sql)
         try:
             cur.execute(sql)
@@ -39,28 +39,6 @@ class Sql:
     def select_cve_detail_list(cls):
         # sql = 'SELECT product_id, product_name, year, vul_type, cve from cve_detail_list limit 5;'
         sql = 'SELECT product_id, product_name, year, vul_type, cve from cve_detail_list;'
-        print(sql)
-        try:
-            cur.execute(sql)
-        except:
-            print('#ERROR#select sql error:' + sql)
-        return cur.fetchall()
-
-    @classmethod
-    def select_nvt_cves_by_cve(cls, cve_name):
-        sql = 'SELECT oid from nvt_cves where cve_name = \'%s\'' % (cve_name)
-
-        print(sql)
-        try:
-            cur.execute(sql)
-        except:
-            print('#ERROR#select sql error:' + sql)
-        return cur.fetchall()
-
-    @classmethod
-    def select_nvt_ness_cves_by_cve(cls, cve_name):
-        sql = 'SELECT oid from nvt_ness_cves where cve_name = \'%s\'' % (cve_name)
-
         print(sql)
         try:
             cur.execute(sql)
@@ -105,13 +83,15 @@ class Sql:
     @classmethod
     def ctl_index_nvts_ness(cls):
         index_list = {
-            'CREATE INDEX nvts_ness_by_creation_time ON nvts_ness (creation_time);',
-            'CREATE INDEX nvts_ness_by_cvss_base ON nvts_ness (cvss_base);',
-            'CREATE INDEX nvts_ness_by_family ON nvts_ness (family);',
-            'CREATE INDEX nvts_ness_by_modification_time ON nvts_ness (modification_time);'
-            'CREATE INDEX nvts_ness_by_name ON nvts_ness (name);',
-            'CREATE INDEX nvts_ness_by_oid ON nvts_ness (oid);',
-            'CREATE INDEX nvts_ness_by_solution_type ON nvts_ness (solution_type);',
+            #'CREATE INDEX nvts_ness_by_creation_time ON nvts_ness (creation_time);',
+            #'CREATE INDEX nvts_ness_by_cvss_base ON nvts_ness (cvss_base);',
+            #'CREATE INDEX nvts_ness_by_family ON nvts_ness (family);',
+            #'CREATE INDEX nvts_ness_by_modification_time ON nvts_ness (modification_time);'
+            #'CREATE INDEX nvts_ness_by_name ON nvts_ness (name);',
+            #'CREATE INDEX nvts_ness_by_oid ON nvts_ness (oid);',
+            #'CREATE INDEX nvts_ness_by_solution_type ON nvts_ness (solution_type);',
+            'CREATE INDEX nvts_ness_by_cve ON nvts_ness(cve);',
+            'CREATE INDEX nvts_by_cve ON nvts(cve);',
             }
         for sql in index_list:
             print(sql)
