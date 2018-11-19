@@ -14,7 +14,8 @@ class Myspider(scrapy.Spider):
     allowed_domains = ['cvedetails.com']
     base_url = 'https://www.cvedetails.com'
     exten_url = 'https://www.cvedetails.com/product-list.php'
-
+    product_search_url = 'https://www.cvedetails.com/product-search.php?vendor_id=0&search='
+    vendor_search_url = 'https://www.cvedetails.com/vendor-search.php?search='
     """
     https://www.cvedetails.com/product/11366   -> windows server 2008
     """
@@ -33,13 +34,34 @@ class Myspider(scrapy.Spider):
             for product_id in product_list:
                 if 'product' in key:
                     product_url = self.base_url + '/product/' + product_id
+                    print('#####(product)url:' + product_url)
+                    yield Request(product_url, self.get_product_url)
                 elif 'vendor' in key:
                     product_url = self.base_url + '/vendor/' + product_id
+                    print('#####(vendor)url:' + product_url)
+                    yield Request(product_url, self.get_product_url)
+                elif 'search-pd' in key:
+                    search_url = self.product_search_url + '%%25%s%%25' % (product_id)
+                    print('#####(search product)url:' + search_url)
+                    yield Request(search_url, self.get_search_product_url)
                 else:
                     print('#ERROR# key type failed:' + key)
                     return
-                print('#####url:' + product_url)
-                yield Request(product_url, self.get_product_url)
+
+    def get_search_product_url(self, response):
+        soup = BeautifulSoup(response.text, 'lxml')
+        """
+        <a href="//www.cvedetails.com/product/6646/Apache-Tomcat-Apache-Tomcat.html?vendor_id=3802" title="Product Details Apache Tomcat Apache Tomcat">Apache Tomcat</a>
+        """
+        url_list = soup.find_all('a', 
+            href = re.compile("//www.cvedetails.com/product/"),
+            title = re.compile("Product Details") )
+        for item in url_list:
+            url_href = item['href']
+            product_id = url_href.split('/')[4]
+            url = self.base_url + '/product/' + product_id
+            print('search out url:' + url)
+            yield Request(url, self.get_product_url)
 
     def get_product_url(self, response):
         #print(response.text)

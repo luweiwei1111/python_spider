@@ -268,16 +268,61 @@ Virtualization_LIST = {
            }
 
 Vendor_LIST = {
-            '315',           #F5
-            '16',            #Cisco
+            '16',            #cicso
+            '874',           #Juniper
+            '5979',          #Huawei
+            '315',           #q=F5
+            '11971',         #q=ZTE
+            '136',           #q=Checkpoint
+            '3080',          #Fortinet
+            '15054',         #q=Hillstone+Software
+             }
+
+
+DEVICES_LIST = {
+            '25464',         #HP-H3c-High-Performance
+            '25334',         #Huawei-H3c-Ar
+            '25461',         #HP-H3c-Ethernet
+            '24230',         #HP-A7506-Switch-Chassis
+            '25463',         #HP-H3c-Processing
+            '25465',         #HP-H3c-Processor-
+            '25462',         #HP-H3c-Router
+            '25459',         #HP-H3c-Routing
+            '25460',         #HP-H3c-Switch
+            '24530',         #HP-Msr5040
+            '24549',         #HP-Rt-msr2020-ac
+            }
+
+APPS_P_LIST = {
+            '3436',         #IIS
+            }
+
+APPS_V_LIST = {
+            '45',            #Apache
+            }
+
+#https://www.cvedetails.com/vendor-search.php?search=%25apache%25
+#https://www.cvedetails.com/product-search.php?vendor_id=0&search=%25weblogic%25
+APPS_SPD_LIST = {
+            'weblogic',         #weblogic
+            'websphere',        #websphere
+            'tomcat',           #tomcat
+            'adobe',            #adobe
+            'screenos',         #screenos
+            'sendmail',         #sendmail
+            'silverlight',      #Silverlight
+            'skype',            #skype
+            'firefox',          #firefox
             }
 
 PRODUCT_DICT = {
-            #'product-os_win': WIN_LIST,            #windows操作系统(左世涛)
-            #'product-os_linux': LINUX_LIST,        #linux操作系统(裴杰)
-            'product-bigdata': Virtualization_LIST,       #大数据组件(唐逸群)
-            #'product-apps': APPS_LIST,             #应用中间件(卢伟伟)
-            #'product-db': DB_LIST,                 #数据库(裴杰)
-            #'product-devices': DEVICES_LIST        #网络设备(廖成杰)
-            'vendor-device': Vendor_LIST            #Cisco
+            #'product-os_win': WIN_LIST,              #windows操作系统(左世涛)
+            #'product-os_linux': LINUX_LIST,          #linux操作系统(裴杰)
+            #'product-bigdata': Virtualization_LIST,  #大数据组件(唐逸群)
+            'product-apps': APPS_P_LIST,             #应用中间件(卢伟伟)product
+            'vendor-apps': APPS_V_LIST,              #应用中间件(卢伟伟)vendor
+            'search-pd-apps': APPS_SPD_LIST,         #应用中间件(卢伟伟) 关键字搜索(根据product产品搜索)
+            #'product-db': DB_LIST,                   #数据库(裴杰)
+            #'product-devices': DEVICES_LIST,         #网络设备(廖成杰)
+            #'vendor-device': Vendor_LIST,            #Cisco
             }
