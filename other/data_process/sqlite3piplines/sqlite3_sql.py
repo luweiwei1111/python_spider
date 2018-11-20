@@ -101,7 +101,6 @@ class Sql:
                 print('#ERROR#create index sql error:' + sql)
         cnx.commit()
 
-
     @classmethod
     def insert_cve_report(cls, product_id, product_name, year, vul_type, cve, topvas_file, topvas_exist, nessus_file, nessus_exist):
         sql = ''
@@ -114,4 +113,15 @@ class Sql:
         except:
             print('#ERROR#insert cve_report sql error:' + sql)
         cnx.commit()
+
+    @classmethod
+    def select_tb_cve_report(cls):
+        sql = 'select nessus_file from cve_report where topvas_exist = \'no\' and nessus_exist= \'yes\';'
+
+        print(sql)
+        try:
+            cur.execute(sql)
+        except:
+            print('#ERROR#select sql error:' + sql)
+        return cur.fetchall()
     

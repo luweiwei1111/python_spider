@@ -13,8 +13,8 @@ class TopVAS:
     def __init__(self):
         #Sql.drop_tb_cve_report()
         Sql.ctl_tb_cve_report()
-        Sql.cls_tb_cve_report()
-        Sql.ctl_index_nvts_ness()
+        #Sql.cls_tb_cve_report()
+        #Sql.ctl_index_nvts_ness()
 
     def cve_report(self):
         #cve topvas
@@ -61,6 +61,22 @@ class TopVAS:
             #生成报告
             Sql.insert_cve_report(product_id, product_name, year, vul_type, cve, topvas_file, topvas_exist, nessus_file, nessus_exist)
 
+    def get_cve_report_files(self):
+        file_list = []
+        result_file = Sql.select_tb_cve_report()
+        count = 0
+        for item in result_file:
+            #file_tmp_list = item[0]
+            #print(file_tmp_list)
+            file_tmp_list = item[0].split(',')
+            for file in file_tmp_list:
+               if file not in file_list:
+                   print('ness file:' + file)
+                   count = count + 1
+                   file_list.append(file)
+        print('file num=' + str(count))
+
 if __name__ == '__main__':
     topvas = TopVAS()
-    topvas.cve_report()
+    #topvas.cve_report()
+    topvas.get_cve_report_files()
