@@ -20,7 +20,7 @@ NEWSPIDER_MODULE = 'cvedetails.spiders'
 USER_AGENT = 'Mozilla/5.0 (Windows NT 6.1; W…) Gecko/20100101 Firefox/62.0'
 
 # Obey robots.txt rules
-ROBOTSTXT_OBEY = True
+ROBOTSTXT_OBEY = False
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 #CONCURRENT_REQUESTS = 32
@@ -28,7 +28,7 @@ ROBOTSTXT_OBEY = True
 # Configure a delay for requests for the same website (default: 0)
 # See http://scrapy.readthedocs.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
-#DOWNLOAD_DELAY = 3
+DOWNLOAD_DELAY = 3
 # The download delay setting will honor only one of:
 #CONCURRENT_REQUESTS_PER_DOMAIN = 16
 #CONCURRENT_REQUESTS_PER_IP = 16
@@ -53,9 +53,11 @@ ROBOTSTXT_OBEY = True
 
 # Enable or disable downloader middlewares
 # See http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
-#DOWNLOADER_MIDDLEWARES = {
-#    'cvedetails.middlewares.MyCustomDownloaderMiddleware': 543,
-#}
+DOWNLOADER_MIDDLEWARES = {
+    #'cvedetails.middlewares.MyCustomDownloaderMiddleware': 543,
+    'cvedetails.middlewares.middleware.JavaScriptMiddleware': 543, #键为中间件类的路径，值为中间件的顺序
+    'scrapy.downloadermiddlewares.useragent.UserAgentMiddleware':None, #禁止内置的中间件
+}
 
 # Enable or disable extensions
 # See http://scrapy.readthedocs.org/en/latest/topics/extensions.html
@@ -227,6 +229,14 @@ DB_LIST = {
             '21801',		#MySQL
            }
 
+Openssh_LIST = {
+            '585',          #Openssh
+            '383',          #Openssl-Openssl
+            '3966',         #readhat-Openssl
+            '13982',        #openssl project-Openssl
+            '30688',        #libressl
+            }
+
 Virtualization_LIST = {
         #########Hadoop
             '22215',         #Apache-Hadoop
@@ -304,25 +314,30 @@ APPS_V_LIST = {
 #https://www.cvedetails.com/vendor-search.php?search=%25apache%25
 #https://www.cvedetails.com/product-search.php?vendor_id=0&search=%25weblogic%25
 APPS_SPD_LIST = {
-            'weblogic',         #weblogic
-            'websphere',        #websphere
-            'tomcat',           #tomcat
+            #'weblogic',         #weblogic
+            #'websphere',        #websphere
+            #'tomcat',           #tomcat
             'adobe',            #adobe
-            'screenos',         #screenos
-            'sendmail',         #sendmail
-            'silverlight',      #Silverlight
-            'skype',            #skype
+            #'screenos',         #screenos
+            #'sendmail',         #sendmail
+            #'silverlight',      #Silverlight
+            #'skype',            #skype
             'firefox',          #firefox
+            }
+
+DEVICES_SVD_LIST = {
+            'cisco',            #cisco
             }
 
 PRODUCT_DICT = {
             #'product-os_win': WIN_LIST,              #windows操作系统(左世涛)
             #'product-os_linux': LINUX_LIST,          #linux操作系统(裴杰)
             #'product-bigdata': Virtualization_LIST,  #大数据组件(唐逸群)
-            'product-apps': APPS_P_LIST,             #应用中间件(卢伟伟)product
-            'vendor-apps': APPS_V_LIST,              #应用中间件(卢伟伟)vendor
+            #'product-apps': APPS_P_LIST,             #应用中间件(卢伟伟)product
+            #'vendor-apps': APPS_V_LIST,              #应用中间件(卢伟伟)vendor
             'search-pd-apps': APPS_SPD_LIST,         #应用中间件(卢伟伟) 关键字搜索(根据product产品搜索)
             #'product-db': DB_LIST,                   #数据库(裴杰)
             #'product-devices': DEVICES_LIST,         #网络设备(廖成杰)
+            'search-vd-devices': DEVICES_SVD_LIST,         #应用中间件(卢伟伟) 关键字搜索(根据product产品搜索)
             #'vendor-device': Vendor_LIST,            #Cisco
             }
