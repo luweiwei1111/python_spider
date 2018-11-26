@@ -7,6 +7,7 @@ from cvedetails.items import CvedetailsItem
 from cvedetails.sqlitepiplines.sql import Sql
 from lxml import etree
 from cvedetails import settings
+from cvedetails.plugins_data.init_data import ExcelRead
 
 class Myspider(scrapy.Spider):
 
@@ -25,32 +26,40 @@ class Myspider(scrapy.Spider):
         Sql.clr_cve_details()
         Sql.clr_cve_detail_list()
 
+        #读取excel数据并保存到db
+        excel_fd = ExcelRead()
+        excel_fd.read_excel_to_db()
+
     def start_requests(self):
         count = 0
         print('###base url:' + self.base_url)
-        for key in settings.PRODUCT_DICT:
-            product_list = settings.PRODUCT_DICT[key]
-            print('KEY=' + key)
-            for product_id in product_list:
-                if 'product' in key:
-                    product_url = self.base_url + '/product/' + product_id
-                    print('#####(product)url:' + product_url)
-                    yield Request(product_url, self.get_product_url)
-                elif 'vendor' in key:
-                    product_url = self.base_url + '/vendor/' + product_id
-                    print('#####(vendor)url:' + product_url)
-                    yield Request(product_url, self.get_product_url)
-                elif 'search-pd' in key:
-                    search_url = self.product_search_url + '%%25%s%%25' % (product_id)
-                    print('#####(search product)url:' + search_url)
-                    yield Request(search_url, self.get_search_product_url)
-                elif 'search-vd' in key:
-                    search_url = self.vendor_search_url + '%%25%s%%25' % (product_id)
-                    print('#####(search product)url:' + search_url)
-                    yield Request(search_url, self.get_search_product_url)
-                else:
-                    print('#ERROR# key type failed:' + key)
-                    return
+
+        results_product = Sql.select_from_settings_by_product()
+        for settings_info in results_product:
+            product_id = settings_info[0]
+            product_url = self.base_url + '/product/' + product_id
+            print('#####(product)url:' + product_url)
+            yield Request(product_url, self.get_product_url)
+
+        results_vendor = Sql.select_from_settings_by_vendor()
+        for settings_info in results_vendor:
+            vendor_id = settings_info[0]
+            vendor_url = self.base_url + '/vendor/' + vendor_id
+            print('#####(vendor)url:' + vendor_url)
+
+        results_s_product = Sql.select_from_settings_by_s_product()
+        for settings_info in results_s_product:
+            s_product = settings_info[0]
+            search_url = self.product_search_url + '%%25%s%%25' % (s_product)
+            print('#####(search product)url:' + search_url)
+            yield Request(search_url, self.get_search_product_url)
+
+        results_s_vendor = Sql.select_from_settings_by_s_vendor()
+        for settings_info in results_s_vendor:
+            s_vendor = settings_info[0]
+            search_url = self.vendor_search_url + '%%25%s%%25' % (s_vendor)
+            print('#####(search product)url:' + search_url)
+            yield Request(search_url, self.get_search_vendor_url)
 
     def get_search_product_url(self, response):
         soup = BeautifulSoup(response.text, 'lxml')
