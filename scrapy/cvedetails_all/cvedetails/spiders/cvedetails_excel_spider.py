@@ -26,10 +26,6 @@ class Myspider(scrapy.Spider):
         Sql.clr_cve_details()
         Sql.clr_cve_detail_list()
 
-        #读取excel数据并保存到db
-        excel_fd = ExcelRead()
-        excel_fd.read_excel_to_db()
-
     def start_requests(self):
         count = 0
         print('###base url:' + self.base_url)
@@ -140,13 +136,16 @@ class Myspider(scrapy.Spider):
         product_list = soup.find_all('a', 
                 href=re.compile("//www.cvedetails.com/product"))
         
-        if len(product_list) == 0:
-            product_list = soup.find_all('a', 
-                href=re.compile("//www.cvedetails.com/vendor"))
+        vendor_list = soup.find_all('a', 
+            href=re.compile("//www.cvedetails.com/vendor"))
+        if len(product_list) != 0:
+            product_name_text = product_list[0] + ' ' + vendor_list[0]
+        else:
+            product_name_text = vendor_list[0]
 
-        product_name = Sql.sqliteEscape(product_list[0].text)
+        product_name = Sql.sqliteEscape(product_name_text)
         item['product_name'] = product_name
-        print('2.操作系统：' + item['product_name'])
+        print('2.名字' + item['product_name'])
 
         #3.year TEXT NOT NULL
         #print(vul_type_list)
