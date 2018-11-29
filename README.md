@@ -12,3 +12,6 @@ git add .
 git commit -m "test"
 git push -u orgin master
 git pull
+
+#django
+https://github.com/YIDAOHU/MIniMovie
