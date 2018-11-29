@@ -278,6 +278,7 @@ class Sql:
     @classmethod
     def select_from_settings_by_product(cls):
         sql = 'select product_id from settings where product_search = \'no\' and vendor_search = \'no\' and product_id != \'None\';'
+        #sql = 'select product_id from settings where product_search = \'no\' and vendor_search = \'no\' and product_id != \'None\' limit 1;'
 
         print(sql)
         try:
@@ -289,6 +290,7 @@ class Sql:
     @classmethod
     def select_from_settings_by_vendor(cls):
         sql = 'select vendor_id from settings where product_search = \'no\' and vendor_search = \'no\' and vendor_id != \'None\' and product_id = \'None\';'
+        #sql = 'select vendor_id from settings where product_search = \'no\' and vendor_search = \'no\' and vendor_id != \'None\' and product_id = \'None\' limit 1;'
 
         print(sql)
         try:
@@ -300,7 +302,7 @@ class Sql:
     @classmethod
     def select_from_settings_by_s_product(cls):
         sql = 'select product_search from settings where product_search != \'no\' and vendor_search = \'no\';'
-
+        #sql = 'select product_search from settings where product_search != \'no\' and vendor_search = \'no\' limit 1;'
         print(sql)
         try:
             cur.execute(sql)
@@ -311,6 +313,7 @@ class Sql:
     @classmethod
     def select_from_settings_by_s_vendor(cls):
         sql = 'select vendor_search from settings where product_search = \'no\' and vendor_search != \'no\';'
+        #sql = 'select vendor_search from settings where product_search = \'no\' and vendor_search != \'no\' limit 1;'
 
         print(sql)
         try:

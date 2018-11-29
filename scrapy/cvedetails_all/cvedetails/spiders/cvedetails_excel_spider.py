@@ -54,7 +54,7 @@ class Myspider(scrapy.Spider):
         for settings_info in results_s_vendor:
             s_vendor = settings_info[0]
             search_url = self.vendor_search_url + '%%25%s%%25' % (s_vendor)
-            print('#####(search product)url:' + search_url)
+            print('#####(search vendor)url:' + search_url)
             yield Request(search_url, self.get_search_vendor_url)
 
     def get_search_product_url(self, response):
@@ -133,15 +133,35 @@ class Myspider(scrapy.Spider):
         print('1.产品ID：' + item['product_id'])
 
         #2.product_name        TEXT NOT NULL
-        product_list = soup.find_all('a', 
-                href=re.compile("//www.cvedetails.com/product"))
-        
-        vendor_list = soup.find_all('a', 
-            href=re.compile("//www.cvedetails.com/vendor"))
-        if len(product_list) != 0:
-            product_name_text = product_list[0] + ' ' + vendor_list[0]
-        else:
-            product_name_text = vendor_list[0]
+        #<a href="//www.cvedetails.com/product/2002/Microsoft-.net-Framework.html?vendor_id=26" title="Product Details Microsoft .net Framework">.net Framework</a>
+        product_list = soup.find('a', 
+                href=re.compile("//www.cvedetails.com/product"),
+                title=re.compile("Product Details"))
+        product_txt = ''
+        if product_list != None:
+            product_txt = product_list.text
+
+        #<a href="//www.cvedetails.com/vendor/26/Microsoft.html" title="Details for Microsoft">Microsoft</a>
+        vendor_list = soup.find('a', 
+            href=re.compile("//www.cvedetails.com/vendor"),
+            title=re.compile("Details for"))
+        vendor_txt = ''
+        if vendor_list != None:
+            vendor_txt = vendor_list.text
+
+        if product_txt == '' and vendor_txt == '':
+            print('#ERROR product null and vendor null')
+            return
+        # print('############product:')
+        # print(product_txt)
+        # print(type(product_txt))
+        # print('############vendor:')
+        # print(vendor_txt)
+        # print(type(product_txt))
+
+        product_name_text = vendor_txt + '->' + product_txt
+        if product_name_text[0] == '->':
+            product_name_text = product_name_text[1:]
 
         product_name = Sql.sqliteEscape(product_name_text)
         item['product_name'] = product_name

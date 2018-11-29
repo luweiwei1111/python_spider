@@ -69,7 +69,7 @@ COOKIES_ENABLED = False
 ITEM_PIPELINES = {
     #'cvedetails.pipelines.CvedetailsPipeline': 300,
     'scrapy.downloadermiddleware.useragent.UserAgentMiddleware': None,
-    'cvedetails.middlewares.middleware.MyUserAgentMiddleware': 400,
+    'cvedetails.middleware.middleware.MyUserAgentMiddleware': 400,
     'cvedetails.sqlitepiplines.pipelines.CvedetailsPipeline': 1,
 }
 
