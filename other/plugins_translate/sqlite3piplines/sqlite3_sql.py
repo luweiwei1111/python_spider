@@ -313,5 +313,16 @@ class Sql:
         return cur.fetchall()
 
     @classmethod
+    def select_nvts(cls):
+        sql = 'select * from nvts;'
+
+        print(sql)
+        try:
+            cur.execute(sql)
+        except:
+            print('#select sql error:' + sql)
+        return cur.fetchall()
+
+    @classmethod
     def sqliteEscape(cls, keyWord):
         return keyWord.replace("/", "//").replace("'", "''").replace("[", "/[").replace("]", "/]").replace("%", "/%").replace("&","/&").replace("_", "/_").replace("(", "/(").replace(")", "/)")
