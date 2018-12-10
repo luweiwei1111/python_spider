@@ -15,3 +15,6 @@ git pull
 
 #django
 https://github.com/YIDAOHU/MIniMovie
+
+#动态爬取
+https://github.com/dangsh/hive
